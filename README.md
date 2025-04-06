@@ -7,7 +7,7 @@
 ## Key Highlights
 
 - **Unified** approach: single model for dimensionality reduction + eGRN inference
-- **Continuous eGRN modelling** : each cell is a mixture of regulatory states, allwoing study of changes in GRNs. No need for predefined clusters  
+- **Continuous eGRN modelling** : each cell is a mixture of topics, allowing study of changes in GRNs. No need for predefined clusters  
 - **Scalable**: mini-batch training for millions of cells
   
 ## 📦 Installation and Usage
