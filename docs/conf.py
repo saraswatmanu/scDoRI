@@ -29,15 +29,18 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "sidebar_hide_name": True,
-    # Add other Furo options if you like
-}
+    "github_url": "https://github.com/saraswatmanu/scDoRI",
+ "navbar_end": ["navbar-icon-links"],
+
+    }
+
 html_static_path = ['_static']
 html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "saraswatmanu",
     "github_repo": "scDoRI",
     "github_version": "main",
-    "conf_py_path": "/docs/",  # Path in the repo to your docs root
+    "conf_py_path": "/docs/",  
 }
 # -- Path setup --------------------------------------------------------------
 
