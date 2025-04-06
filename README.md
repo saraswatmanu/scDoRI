@@ -5,14 +5,10 @@
 **scDoRI** is a deep learning framework for single-cell **multiome** data (RNA + ATAC) that infers **enhancer-mediated gene regulatory networks (eGRNs)**. By combining an **encoder–decoder** approach with mechanistic constraints (enhancer–gene links, TF binding logic), scDoRI learns **topics** that group co-accessible peaks, their cis-linked genes and upstream activator and repressor TFs – all while scaling to large datasets via mini-batches.
 
 ## 🚀 Highlights
-
-- **Unified** approach: single model for dimensionality reduction + eGRN inference
-- **Continuous eGRN modelling** : each cell is a mixture of topics, allowing study of changes in GRNs. No need for predefined clusters  
-- **Scalable**: mini-batch training for millions of cells
 - 🔄 **Unified** approach: single model for dimensionality reduction + eGRN inference
 - 🧠 Learns **topics** that represent cell-state-specific regulatory programs
 - 🧬**Continuous eGRN modelling** : each cell is a mixture of topics, allowing study of changes in GRNs. No need for predefined clusters  
-- 🧰 Supports large datasets via **mini-batch training**
+- 🧰 **Scalable** to large datasets via **mini-batch training**
 
   
 ## 📦 Installation 
