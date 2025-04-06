@@ -32,7 +32,13 @@ html_theme_options = {
     # Add other Furo options if you like
 }
 html_static_path = ['_static']
-
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "saraswatmanu",
+    "github_repo": "scDoRI",
+    "github_version": "main",
+    "conf_py_path": "/docs/",  # Path in the repo to your docs root
+}
 # -- Path setup --------------------------------------------------------------
 
 import os
