@@ -1,4 +1,4 @@
-name: scdori_test_env2
+name: scdori_env
 channels:
   - pytorch
   - nvidia
