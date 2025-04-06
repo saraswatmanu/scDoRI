@@ -1,0 +1,1262 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Preprocessing Pipeline &#8212; scDoRI  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'preprocessing_pipeline';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="scDORI training" href="scdori.html" />
+    <link rel="prev" title="API Reference" href="api_reference.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">scDoRI  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Preprocessing Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scdori.html">scDORI training</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="api_reference.html" class="nav-link">API Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Preprocessing Pipeline</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-preprocessing_pipeline.data_io">
+<span id="preprocessing-pipeline"></span><h1>Preprocessing Pipeline<a class="headerlink" href="#module-preprocessing_pipeline.data_io" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.data_io.create_dir_if_not_exists">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.data_io.</span></span><span class="sig-name descname"><span class="pre">create_dir_if_not_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/data_io.html#create_dir_if_not_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.data_io.create_dir_if_not_exists" title="Link to this definition">#</a></dt>
+<dd><p>Create a directory (and parent directories) if it does not already exist.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>directory<span class="classifier">pathlib.Path</span></dt><dd><p>The directory path to create.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>If the directory already exists, does nothing. Otherwise, it is created
+along with any necessary parent folders.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.data_io.load_anndata">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.data_io.</span></span><span class="sig-name descname"><span class="pre">load_anndata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">AnnData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AnnData</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/data_io.html#load_anndata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.data_io.load_anndata" title="Link to this definition">#</a></dt>
+<dd><p>Load RNA and ATAC data from disk into AnnData objects.</p>
+<section id="id1">
+<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_dir<span class="classifier">pathlib.Path</span></dt><dd><p>Base directory containing the <cite>.h5ad</cite> files.</p>
+</dd>
+<dt>rna_file<span class="classifier">str</span></dt><dd><p>The filename for the RNA data (H5AD).</p>
+</dd>
+<dt>atac_file<span class="classifier">str</span></dt><dd><p>The filename for the ATAC data (H5AD).</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Returns<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<dl>
+<dt>(AnnData, AnnData)</dt><dd><p>A tuple containing:
+- data_rna: AnnData</p>
+<blockquote>
+<div><p>The RNA AnnData object.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>data_atac: AnnData</dt><dd><p>The ATAC AnnData object.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<p>Both <cite>.h5ad</cite> files are expected to be located in <cite>data_dir</cite>.
+This function logs the path from which each file is loaded.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.data_io.save_processed_datasets">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.data_io.</span></span><span class="sig-name descname"><span class="pre">save_processed_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/data_io.html#save_processed_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.data_io.save_processed_datasets" title="Link to this definition">#</a></dt>
+<dd><p>Save processed RNA and ATAC AnnData objects with matching cell order.</p>
+<section id="id3">
+<h2>Parameters<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>The RNA AnnData object, potentially subset or processed.</p>
+</dd>
+<dt>data_atac<span class="classifier">anndata.AnnData</span></dt><dd><p>The ATAC AnnData object, potentially subset or processed.</p>
+</dd>
+<dt>out_dir<span class="classifier">pathlib.Path</span></dt><dd><p>The directory where the processed <cite>.h5ad</cite> files will be saved.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h2>Returns<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Writes two files, <cite>rna_processed.h5ad</cite> and <cite>atac_processed.h5ad</cite>,
+ensuring both have the same set and order of cells.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h2>Notes<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>This function intersects the cell indices (obs_names) of <cite>data_rna</cite> and <cite>data_atac</cite> to keep only the common cells.</p></li>
+<li><p>The final shapes of the saved AnnData objects are logged.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.filtering">
+<dt class="sig sig-object py" id="preprocessing_pipeline.filtering.intersect_cells">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.filtering.</span></span><span class="sig-name descname"><span class="pre">intersect_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">AnnData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AnnData</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/filtering.html#intersect_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.filtering.intersect_cells" title="Link to this definition">#</a></dt>
+<dd><p>Keep only the cells that are present in both RNA and ATAC datasets.</p>
+<section id="id6">
+<h2>Parameters<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>The RNA single-cell data.</p>
+</dd>
+<dt>data_atac<span class="classifier">anndata.AnnData</span></dt><dd><p>The ATAC single-cell data.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h2>Returns<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>(data_rna_sub, data_atac_sub)<span class="classifier">tuple of anndata.AnnData</span></dt><dd><p>Two AnnData objects that share the same set of cells, in the same order.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h2>Notes<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The function finds the intersection of <cite>obs_names</cite> (cell barcodes) between
+the two AnnData objects.</p></li>
+<li><p>It logs the new shapes of the intersected RNA and ATAC data.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.filtering.remove_mitochondrial_genes">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.filtering.</span></span><span class="sig-name descname"><span class="pre">remove_mitochondrial_genes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mito_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mt-'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnnData</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/filtering.html#remove_mitochondrial_genes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.filtering.remove_mitochondrial_genes" title="Link to this definition">#</a></dt>
+<dd><p>Remove mitochondrial genes from the RNA data based on a gene name prefix.</p>
+<section id="id9">
+<h2>Parameters<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>The RNA AnnData containing gene expression counts.</p>
+</dd>
+<dt>mito_prefix<span class="classifier">str, optional</span></dt><dd><p>The prefix used to identify mitochondrial genes. Default is “mt-“.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h2>Returns<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>anndata.AnnData</dt><dd><p>A new AnnData object without mitochondrial genes. The original data
+is not modified in-place.</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h2>Notes<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Mitochondrial genes are identified by checking if gene names start with
+<cite>mito_prefix</cite> (case-insensitive).</p></li>
+<li><p>A boolean column “mt” is added to <cite>data_rna.var</cite> to indicate whether
+each gene was marked as mitochondrial. This subset is then removed
+from the data.</p></li>
+<li><p>Logs the number of removed genes.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.correlation">
+<dt class="sig sig-object py" id="preprocessing_pipeline.correlation.compute_in_silico_chipseq">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.correlation.</span></span><span class="sig-name descname"><span class="pre">compute_in_silico_chipseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atac_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motif_scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">99.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/correlation.html#compute_in_silico_chipseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.correlation.compute_in_silico_chipseq" title="Link to this definition">#</a></dt>
+<dd><p>Compute correlation-based in-silico ChIP-seq embeddings, separating activator
+and repressor signals.</p>
+<section id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Compute the Pearson correlation for each (peak, TF) pair.</p></li>
+<li><p>Retain only the positive part as an “activator” correlation and the negative part as a “repressor” correlation.</p></li>
+<li><p>For each TF, estimate significance thresholds for correlations from background peaks (i.e., peaks with minimal motif scores for each TF).</p></li>
+<li><p>Multiply thresholded correlations by the motif scores to produce final activator and repressor embeddings.</p></li>
+<li><p>Apply MinMax scaling to each TF separately.</p></li>
+</ol>
+</section>
+<section id="id12">
+<h2>Parameters<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>atac_matrix<span class="classifier">np.ndarray</span></dt><dd><p>Shape (n_metacells, n_peaks). Matrix of peak accessibility (or insertion counts)
+where each row is a metacell and each column is a peak.</p>
+</dd>
+<dt>rna_matrix<span class="classifier">np.ndarray</span></dt><dd><p>Shape (n_metacells, n_tfs). Matrix of TF expression where each row is a metacell
+and each column is a TF.</p>
+</dd>
+<dt>motif_scores<span class="classifier">pd.DataFrame</span></dt><dd><p>Shape (n_peaks, n_tfs). DataFrame containing motif scores for each (peak, TF) pair.</p>
+</dd>
+<dt>percentile<span class="classifier">float, optional</span></dt><dd><p>The percentile threshold used to determine correlation significance (for activators
+and repressors). Default is 99.9.</p>
+</dd>
+<dt>n_bg<span class="classifier">int, optional</span></dt><dd><p>Number of peaks per TF used to form the “background” distribution (lowest motif
+scores). Default is 10000.</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h2>Returns<a class="headerlink" href="#id13" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>insilico_chipseq_act_sig<span class="classifier">np.ndarray</span></dt><dd><p>Shape (n_peaks, n_tfs). Final activator scores after thresholding correlations
+and combining with motif scores. Scaled to [0, 1].</p>
+</dd>
+<dt>insilico_chipseq_rep_sig<span class="classifier">np.ndarray</span></dt><dd><p>Shape (n_peaks, n_tfs). Final repressor scores after thresholding correlations
+and combining with motif scores. Scaled to [-1, 0].</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h2>Notes<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Positive correlation is interpreted as activator-like; negative correlation is repressor-like.</p></li>
+<li><p>A background distribution is formed from peaks with the smallest motif scores, then used to find correlation thresholds at the requested percentile.</p></li>
+<li><p>The final arrays are MinMax-scaled:
+* The repressor array is scaled into the range [-1, 0].
+* The activator array is scaled into the range [0, 1].</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.utils">
+<dt class="sig sig-object py" id="preprocessing_pipeline.utils.compute_gene_peak_distance_matrix">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.utils.</span></span><span class="sig-name descname"><span class="pre">compute_gene_peak_distance_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_coordinates_intersect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/utils.html#compute_gene_peak_distance_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.utils.compute_gene_peak_distance_matrix" title="Link to this definition">#</a></dt>
+<dd><p>Compute a distance matrix between peaks (ATAC) and genes (RNA), accounting for strand.</p>
+<section id="this-function">
+<h2>This function:<a class="headerlink" href="#this-function" title="Link to this heading">#</a></h2>
+<ol class="arabic">
+<li><p>Expects the ATAC data (<cite>data_atac.var</cite>) to have columns “chr”, “start”, “end”, and “peak_name”.</p></li>
+<li><dl class="simple">
+<dt>Expects the gene coordinates DataFrame (<cite>gene_coordinates_intersect</cite>) to have columns</dt><dd><p>[“chr_gene”, “start”, “end”, “strand”, “gene”].</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>For each gene, we compute a distance to each peak by:</dt><dd><ul class="simple">
+<li><p>0 if the peak midpoint is within gene-body or promoter (5kb upstream of TSS by default),</p></li>
+</ul>
+<p>e.g., if on the “+” strand and midpoint is between (start - 5000) and end =&gt; distance=0.
+If on the “-” strand and midpoint is between start and (end + 5000) =&gt; distance=0.
+- Otherwise, distance = min(<a href="#id57"><span class="problematic" id="id58">|mid - start|</span></a>, <a href="#id59"><span class="problematic" id="id60">|mid - end|</span></a>).
+- If the chromosome of the gene != chromosome of the peak =&gt; distance = -1.</p>
+</dd>
+</dl>
+</li>
+</ol>
+</section>
+<section id="id15">
+<h2>Parameters<a class="headerlink" href="#id15" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_atac<span class="classifier">pd.DataFrame</span></dt><dd><p>The ATAC dataset. Its <cite>.var</cite> should contain “chr”, “start”, “end”, “peak_name”.</p>
+</dd>
+<dt>data_rna<span class="classifier">pd.DataFrame</span></dt><dd><p>The RNA dataset. Its <cite>.var</cite> is expected to have gene names as indices or relevant columns.</p>
+</dd>
+<dt>gene_coordinates_intersect<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame with gene info, columns at least:
+[“chr_gene”, “start”, “end”, “strand”, “gene”].</p>
+</dd>
+</dl>
+</section>
+<section id="id16">
+<h2>Returns<a class="headerlink" href="#id16" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A 2D NumPy array of shape (n_genes, n_peaks) representing gene-peak distances.
+Each row corresponds to a gene (matching <cite>data_rna.var.index</cite>),
+and each column corresponds to a peak (matching <cite>data_atac.var.index</cite> order).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.utils.create_extended_gene_bed">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.utils.</span></span><span class="sig-name descname"><span class="pre">create_extended_gene_bed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gtf_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_genes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom_sizes_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/utils.html#create_extended_gene_bed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.utils.create_extended_gene_bed" title="Link to this definition">#</a></dt>
+<dd><p>Create an extended gene BED-like DataFrame by adding a window around each gene.</p>
+<p>For each gene in <cite>final_genes</cite>, take the gene feature from <cite>gtf_df</cite> and extend
+the start and end coordinates by <cite>window_size</cite>. If a chromosome sizes file is
+provided, clamp the extended coordinates within valid chromosome boundaries.</p>
+<section id="id17">
+<h2>Parameters<a class="headerlink" href="#id17" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>gtf_df<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame containing GTF entries (e.g., loaded by gtfparse). Expected columns:
+[“feature”, “gene_name”, “seqname”, “start”, “end”, “strand”, …].</p>
+</dd>
+<dt>final_genes<span class="classifier">list of str</span></dt><dd><p>The list of gene names to be extended.</p>
+</dd>
+<dt>window_size<span class="classifier">int</span></dt><dd><p>The number of base pairs to extend on each side of the gene.</p>
+</dd>
+<dt>chrom_sizes_path<span class="classifier">pathlib.Path, optional</span></dt><dd><p>A path to a tab-delimited file of chromosome sizes (e.g., from UCSC),
+with columns [chrom, size]. If provided, coordinates are clamped to [0, chrom_size].</p>
+</dd>
+</dl>
+</section>
+<section id="id18">
+<h2>Returns<a class="headerlink" href="#id18" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame with columns [“chr”, “start_new”, “end_new”, “gene_name”, “strand”]
+representing the extended regions for each gene.</p>
+</dd>
+</dl>
+</section>
+<section id="id19">
+<h2>Notes<a class="headerlink" href="#id19" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Only rows with <cite>feature == “gene”</cite> are considered in the GTF.</p></li>
+<li><p>If a gene is not found in <cite>gtf_df</cite>, it is omitted.</p></li>
+<li><p>The <cite>chr</cite> column is set from the GTF’s “seqname” field.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.peak_selection">
+<dt class="sig sig-object py" id="preprocessing_pipeline.peak_selection.keep_promoters_and_select_hv_peaks">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.peak_selection.</span></span><span class="sig-name descname"><span class="pre">keep_promoters_and_select_hv_peaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_n_peaks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'leiden'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">promoter_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'is_promoter'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnnData</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/peak_selection.html#keep_promoters_and_select_hv_peaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.peak_selection.keep_promoters_and_select_hv_peaks" title="Link to this definition">#</a></dt>
+<dd><p>Retain all promoter peaks and then select highly variable (HV) peaks among non-promoters.</p>
+<section id="id20">
+<h2>Steps<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Identify peaks marked as promoters where <cite>var[promoter_col] == True</cite>.</p></li>
+<li><p>Keep all promoter peaks unconditionally.</p></li>
+<li><p>Among non-promoter peaks, select the top (total_n_peaks - #promoters) peaks by standard deviation across clusters.</p></li>
+<li><p>If the number of promoter peaks alone is &gt;= <cite>total_n_peaks</cite>, keep all promoters.</p></li>
+<li><p>Combine the sets of promoter and HV non-promoter peaks.</p></li>
+</ol>
+</section>
+<section id="id21">
+<h2>Parameters<a class="headerlink" href="#id21" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_atac<span class="classifier">anndata.AnnData</span></dt><dd><p>An AnnData containing ATAC data, with a boolean promoter column in <cite>.var</cite>.</p>
+</dd>
+<dt>total_n_peaks<span class="classifier">int</span></dt><dd><p>The target total number of peaks to keep. May be exceeded if promoter peaks alone
+surpass this number.</p>
+</dd>
+<dt>cluster_key<span class="classifier">str, optional</span></dt><dd><p>Column in <cite>data_atac.obs</cite> defining cluster labels for HV peak selection. Default is “leiden”.</p>
+</dd>
+<dt>promoter_col<span class="classifier">str, optional</span></dt><dd><p>Column in <cite>data_atac.var</cite> indicating which peaks are promoters. Default is “is_promoter”.</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h2>Returns<a class="headerlink" href="#id22" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>anndata.AnnData</dt><dd><p>A subset of <cite>data_atac</cite> containing all promoter peaks plus HV non-promoter peaks.</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h2>Notes<a class="headerlink" href="#id23" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>If <cite>promoter_col</cite> is missing, falls back to standard HV peak selection (without promoter logic).</p></li>
+<li><p>The standard deviation for HV peaks is computed by <cite>select_highly_variable_peaks_by_std</cite>.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.peak_selection.select_highly_variable_peaks_by_std">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.peak_selection.</span></span><span class="sig-name descname"><span class="pre">select_highly_variable_peaks_by_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_top_peaks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'leiden'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnnData</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/peak_selection.html#select_highly_variable_peaks_by_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.peak_selection.select_highly_variable_peaks_by_std" title="Link to this definition">#</a></dt>
+<dd><p>Select highly variable peaks based on the standard deviation of peak accessibility
+across clusters.</p>
+<p>This function:
+1. Groups cells by <cite>cluster_key</cite> in <cite>data_atac.obs</cite>.
+2. Computes ATAC fragment counts and calculates mean accessibility</p>
+<blockquote>
+<div><p>per peak for each cluster.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Computes the standard deviation of each peak’s accessibility across clusters.</p></li>
+<li><p>Selects the top <cite>n_top_peaks</cite> peaks with the highest standard deviation.</p></li>
+</ol>
+<section id="id24">
+<h2>Parameters<a class="headerlink" href="#id24" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_atac<span class="classifier">anndata.AnnData</span></dt><dd><p>An AnnData containing ATAC data. Expects <cite>.obs[cluster_key]</cite> to exist.</p>
+</dd>
+<dt>n_top_peaks<span class="classifier">int</span></dt><dd><p>Number of peaks to retain based on the highest standard deviation across clusters.</p>
+</dd>
+<dt>cluster_key<span class="classifier">str, optional</span></dt><dd><p>The column in <cite>data_atac.obs</cite> specifying cluster labels. Defaults to “leiden”.</p>
+</dd>
+</dl>
+</section>
+<section id="id25">
+<h2>Returns<a class="headerlink" href="#id25" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>anndata.AnnData</dt><dd><p>A subset of <cite>data_atac</cite> containing only the selected peaks.
+If <cite>n_top_peaks &gt;= data_atac.shape[1]</cite>, returns the original data.</p>
+</dd>
+</dl>
+</section>
+<section id="id26">
+<h2>Notes<a class="headerlink" href="#id26" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>If <cite>cluster_key</cite> is missing, a warning is logged and the original AnnData is returned.</p></li>
+<li><p>Transformation <cite>(X + 1) // 2</cite> to interpret insertions as fragment counts.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.motif_scanning">
+<dt class="sig sig-object py" id="preprocessing_pipeline.motif_scanning.compute_motif_scores">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.motif_scanning.</span></span><span class="sig-name descname"><span class="pre">compute_motif_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bed_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fasta_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwms_sub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_to_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_peaks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/motif_scanning.html#compute_motif_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.motif_scanning.compute_motif_scores" title="Link to this definition">#</a></dt>
+<dd><p>Compute a motif score matrix (n_peaks x n_TFs) by scanning peak sequences with FIMO (from tangermeme).</p>
+<section id="id27">
+<h2>Steps<a class="headerlink" href="#id27" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Read peak coordinates from <cite>bed_file</cite>.</p></li>
+<li><p>Extract sequences from <cite>fasta_file</cite>.</p></li>
+<li><p>Run FIMO on these sequences using the PWMs in <cite>pwms_sub</cite>.</p></li>
+<li><p>Aggregate scores per (peak, motif) combination; rename motifs by their TF name.</p></li>
+<li><p>Combine into a DataFrame of shape (n_peaks, n_TFs) and scale values to [0, 1].</p></li>
+</ol>
+</section>
+<section id="id28">
+<h2>Parameters<a class="headerlink" href="#id28" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>bed_file<span class="classifier">pathlib.Path</span></dt><dd><p>The BED file containing peak coordinates. Column 4 must be the peak name.</p>
+</dd>
+<dt>fasta_file<span class="classifier">pathlib.Path</span></dt><dd><p>The path to the reference genome FASTA file.</p>
+</dd>
+<dt>pwms_sub<span class="classifier">dict</span></dt><dd><p>A dictionary of position weight matrices (PWMs), e.g. from a .meme file,
+keyed by some motif identifier.</p>
+</dd>
+<dt>key_to_tf<span class="classifier">dict</span></dt><dd><p>A mapping from motif identifiers to transcription factor (TF) names.</p>
+</dd>
+<dt>n_peaks<span class="classifier">int</span></dt><dd><p>The total number of peaks expected (should match the number of lines in <cite>bed_file</cite>).</p>
+</dd>
+<dt>window<span class="classifier">int, optional</span></dt><dd><p>Window size around the peak to extract sequences for motif scanning. Default is 500.</p>
+</dd>
+<dt>threshold<span class="classifier">float, optional</span></dt><dd><p>Minimum p-value (or e-value) threshold for motif hits in FIMO. Default is 1e-3.</p>
+</dd>
+</dl>
+</section>
+<section id="id29">
+<h2>Returns<a class="headerlink" href="#id29" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame of shape (n_peaks, n_TFs). Rows are indexed by peak names from
+<cite>bed_file</cite>, columns are TF names. Values are scaled motif scores in [0, 1].</p>
+</dd>
+</dl>
+</section>
+<section id="id30">
+<h2>Notes<a class="headerlink" href="#id30" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>If a TF does not appear in any motif hits, its column will be filled with zeros.</p></li>
+<li><p>For each motif name in <cite>pwms_sub</cite>, we rename it to the corresponding TF from <cite>key_to_tf</cite>.</p></li>
+<li><p>The final DataFrame is MinMax-scaled by each column (TF).</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.motif_scanning.load_motif_database">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.motif_scanning.</span></span><span class="sig-name descname"><span class="pre">load_motif_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">motif_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_tfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/motif_scanning.html#load_motif_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.motif_scanning.load_motif_database" title="Link to this definition">#</a></dt>
+<dd><p>Read a .meme motif file and select only the motifs corresponding to TFs of interest.</p>
+<section id="id31">
+<h2>Parameters<a class="headerlink" href="#id31" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>motif_path<span class="classifier">pathlib.Path</span></dt><dd><p>The path to the .meme file.</p>
+</dd>
+<dt>final_tfs<span class="classifier">list of str</span></dt><dd><p>A list of TF names for which we want motifs.</p>
+</dd>
+</dl>
+</section>
+<section id="id32">
+<h2>Returns<a class="headerlink" href="#id32" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>(pwms_sub, key_to_tf)<span class="classifier">tuple of (dict, dict)</span></dt><dd><dl class="simple">
+<dt>pwms_sub<span class="classifier">dict</span></dt><dd><p>A dictionary of PWM matrices (motif_name -&gt; PWM) only for the desired TFs.</p>
+</dd>
+<dt>key_to_tf<span class="classifier">dict</span></dt><dd><p>A mapping from motif_name to TF name (one motif per TF).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h2>Notes<a class="headerlink" href="#id33" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>This function expects that each motif key in the meme file can be parsed to extract a TF name. We assume a format like “MOTIF something <a href="#id61"><span class="problematic" id="id62">Tbx5_</span></a>…”.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.motif_scanning.run_bedtools_intersect">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.motif_scanning.</span></span><span class="sig-name descname"><span class="pre">run_bedtools_intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/motif_scanning.html#run_bedtools_intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.motif_scanning.run_bedtools_intersect" title="Link to this definition">#</a></dt>
+<dd><p>Run a ‘bedtools intersect’ command to keep intervals in file A that overlap intervals in file B.</p>
+<section id="id34">
+<h2>Parameters<a class="headerlink" href="#id34" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>a_bed<span class="classifier">pathlib.Path</span></dt><dd><p>Path to the BED file “A”.</p>
+</dd>
+<dt>b_bed<span class="classifier">pathlib.Path</span></dt><dd><p>Path to the BED file “B”.</p>
+</dd>
+<dt>out_bed<span class="classifier">pathlib.Path</span></dt><dd><p>Output path for the intersected results.</p>
+</dd>
+</dl>
+</section>
+<section id="id35">
+<h2>Returns<a class="headerlink" href="#id35" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Writes a new BED file to <cite>out_bed</cite> containing only intervals from A
+that intersect with B at least once (option -u -wa).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.motif_scanning.simulate_pwm_scoring">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.motif_scanning.</span></span><span class="sig-name descname"><span class="pre">simulate_pwm_scoring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pwm_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bed_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fasta_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocessing_pipeline/motif_scanning.html#simulate_pwm_scoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.motif_scanning.simulate_pwm_scoring" title="Link to this definition">#</a></dt>
+<dd><p>Simulate PWM scoring for a given motif using random data.</p>
+<section id="id36">
+<h2>Parameters<a class="headerlink" href="#id36" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pwm_matrix<span class="classifier">np.ndarray</span></dt><dd><p>Position Weight Matrix for the motif (rows = positions, columns = nucleotides).</p>
+</dd>
+<dt>bed_file<span class="classifier">pathlib.Path or str</span></dt><dd><p>The BED file containing peak locations.</p>
+</dd>
+<dt>fasta_file<span class="classifier">pathlib.Path or str</span></dt><dd><p>Path to the genome FASTA file.</p>
+</dd>
+<dt>window<span class="classifier">int</span></dt><dd><p>The window size around peaks to consider for motif scanning.</p>
+</dd>
+</dl>
+</section>
+<section id="id37">
+<h2>Returns<a class="headerlink" href="#id37" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A simulated DataFrame of motif scores with columns
+[‘motif_name’, ‘sequence_name’, ‘score’].</p>
+</dd>
+</dl>
+</section>
+<section id="id38">
+<h2>Notes<a class="headerlink" href="#id38" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>In a real scenario, this would scan each sequence (peak ± window) with the PWM and return actual FIMO-like hits.</p></li>
+<li><p>Here, random scores are generated for testing.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.metacells">
+<dt class="sig sig-object py" id="preprocessing_pipeline.metacells.create_metacells">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.metacells.</span></span><span class="sig-name descname"><span class="pre">create_metacells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_atac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouping_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'leiden'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sample'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">AnnData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AnnData</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/metacells.html#create_metacells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.metacells.create_metacells" title="Link to this definition">#</a></dt>
+<dd><p>Create metacell-level RNA and ATAC AnnData objects by clustering cells and computing
+mean values per cluster.
+This function:
+1. Normalizes and logs the RNA data, then runs PCA.
+2. Uses Harmony integration for batch correction on the PCA embeddings.
+3. Clusters the RNA data with Leiden at the specified resolution, storing the</p>
+<blockquote>
+<div><p>cluster labels in <code class="docutils literal notranslate"><span class="pre">data_rna.obs[grouping_key]</span></code>.</p>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><dl class="simple">
+<dt>Summarizes RNA expression and ATAC accessibility for each cluster by taking </dt><dd><p>the mean of each feature across all cells in that cluster.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<section id="id39">
+<h2>Parameters<a class="headerlink" href="#id39" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data. A layer “counts” is added and re-assigned later.
+The shape is (n_cells, n_genes).</p>
+</dd>
+<dt>data_atac<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data with the same set or superset of cell IDs in
+<cite>data_rna.obs_names</cite>. The shape is (n_cells, n_peaks).</p>
+</dd>
+<dt>grouping_key<span class="classifier">str, optional</span></dt><dd><p>The key in <cite>data_rna.obs</cite> where the Leiden cluster labels will be stored.
+Default is “leiden”.</p>
+</dd>
+<dt>resolution<span class="classifier">float, optional</span></dt><dd><p>The resolution parameter for Leiden clustering. Higher values yield more clusters.
+Default is 5.0.</p>
+</dd>
+<dt>batch_key<span class="classifier">str, optional</span></dt><dd><p>The column in <cite>data_rna.obs</cite> indicating batch information for Harmony integration.
+Default is “sample”.</p>
+</dd>
+</dl>
+</section>
+<section id="id40">
+<h2>Returns<a class="headerlink" href="#id40" title="Link to this heading">#</a></h2>
+<dl>
+<dt>(rna_metacell, atac_metacell)<span class="classifier">tuple of anndata.AnnData</span></dt><dd><ul class="simple">
+<li><p>rna_metacell : shape (#clusters, n_genes)</p></li>
+<li><p>atac_metacell : shape (#clusters, n_peaks)</p></li>
+</ul>
+<p>The <cite>.obs</cite> index is set to the cluster labels, and the <cite>.var</cite> is inherited from the original <cite>data_rna</cite>/<cite>data_atac</cite>.</p>
+</dd>
+</dl>
+</section>
+<section id="id41">
+<h2>Notes<a class="headerlink" href="#id41" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The function uses <cite>scanpy.external.pp.harmony_integrate</cite> for batch integration on the PCA representation stored in “X_pca_harmony”.</p></li>
+<li><p>The ATAC data is transformed by <cite>(atac_vals + 1) // 2</cite> to interpret insertions as fragment presence, following Martens et al. (2023).</p></li>
+<li><p>Mean values are computed across cells in each cluster for both RNA and ATAC.</p></li>
+<li><p>The original <cite>data_rna.X</cite> is restored to raw counts at the end.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.gene_selection">
+<dt class="sig sig-object py" id="preprocessing_pipeline.gene_selection.compute_hvgs_and_tfs">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.gene_selection.</span></span><span class="sig-name descname"><span class="pre">compute_hvgs_and_tfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_genes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_tfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_genes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_tfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">AnnData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/gene_selection.html#compute_hvgs_and_tfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.gene_selection.compute_hvgs_and_tfs" title="Link to this definition">#</a></dt>
+<dd><p>Compute sets of Highly Variable Genes (HVGs) and TFs (transcription factors)
+for scDoRI training.</p>
+<dl class="simple">
+<dt>This function:</dt><dd><ol class="arabic simple">
+<li><p>Identifies user-specified genes and TFs present in <cite>data_rna</cite>.</p></li>
+<li><p>Selects additional TFs by computing HVGs among potential TFs up to <cite>num_tfs</cite>.</p></li>
+<li><p>Selects non-TF HVGs up to <cite>num_genes</cite> (minus any user-specified genes and TFs).</p></li>
+<li><p>Combines these sets into a final AnnData subset and returns them.</p></li>
+</ol>
+</dd>
+</dl>
+<section id="id42">
+<h2>Parameters<a class="headerlink" href="#id42" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>The RNA single-cell data from which to select HVGs and TFs.</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>A list of all TF names (from a motif database or known TF list).</p>
+</dd>
+<dt>user_genes<span class="classifier">list of str, optional</span></dt><dd><p>A list of user-specified genes that must be included in the final set,
+default is None.</p>
+</dd>
+<dt>user_tfs<span class="classifier">list of str, optional</span></dt><dd><p>A list of user-specified TFs that must be included in the final set,
+default is None.</p>
+</dd>
+<dt>num_genes<span class="classifier">int, optional</span></dt><dd><p>Total number of HVGs (non-TFs) desired. Default is 3000.</p>
+</dd>
+<dt>num_tfs<span class="classifier">int, optional</span></dt><dd><p>Total number of TFs desired. Default is 300.</p>
+</dd>
+<dt>min_cells<span class="classifier">int, optional</span></dt><dd><p>Minimum number of cells in which a gene must be detected (e.g., nonzero)
+to be considered for HVG selection. Default is 20 (not fully enforced in
+this code snippet, but typically used with standard HVG filtering).</p>
+</dd>
+</dl>
+</section>
+<section id="id43">
+<h2>Returns<a class="headerlink" href="#id43" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna_processed<span class="classifier">anndata.AnnData</span></dt><dd><p>A subset of the original data containing the selected HVGs and TFs.</p>
+</dd>
+<dt>final_genes<span class="classifier">list of str</span></dt><dd><p>The final list of HVGs (non-TFs).</p>
+</dd>
+<dt>final_tfs<span class="classifier">list of str</span></dt><dd><p>The final list of TFs.</p>
+</dd>
+</dl>
+</section>
+<section id="id44">
+<h2>Notes<a class="headerlink" href="#id44" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>HVG selection is done by <cite>scanpy.pp.highly_variable_genes</cite>, using normalized/log1p data.</p></li>
+<li><p>User-provided genes and TFs are included by default, removing them from the
+HVG candidate pool if they were already selected.</p></li>
+<li><p>TFs are not re-labeled or otherwise changed beyond this classification.</p></li>
+<li><p>The column <cite>data_rna_processed.var[“gene_type”]</cite> is set to “HVG” or “TF” for each gene.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.gene_selection.filter_protein_coding_genes">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.gene_selection.</span></span><span class="sig-name descname"><span class="pre">filter_protein_coding_genes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_rna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtf_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnnData</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/gene_selection.html#filter_protein_coding_genes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.gene_selection.filter_protein_coding_genes" title="Link to this definition">#</a></dt>
+<dd><p>Retain only protein-coding genes in the RNA AnnData object based on GTF annotations.</p>
+<section id="id45">
+<h2>Parameters<a class="headerlink" href="#id45" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>data_rna<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data.</p>
+</dd>
+<dt>gtf_df<span class="classifier">pd.DataFrame</span></dt><dd><p>A GTF DataFrame (from <cite>load_gtf</cite>) containing columns like “gene_type”, “gene_name”.</p>
+</dd>
+</dl>
+</section>
+<section id="id46">
+<h2>Returns<a class="headerlink" href="#id46" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>anndata.AnnData</dt><dd><p>The AnnData subset containing only protein-coding genes found in both
+the original data and the GTF’s “gene_type == ‘protein_coding’”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.gene_selection.load_gtf">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.gene_selection.</span></span><span class="sig-name descname"><span class="pre">load_gtf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gtf_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/gene_selection.html#load_gtf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.gene_selection.load_gtf" title="Link to this definition">#</a></dt>
+<dd><p>Load gene coordinates from a GTF file into a pandas DataFrame using gtfparse.</p>
+<section id="id47">
+<h2>Parameters<a class="headerlink" href="#id47" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>gtf_path<span class="classifier">pathlib.Path</span></dt><dd><p>The path to the GTF file (optionally gzipped).</p>
+</dd>
+</dl>
+</section>
+<section id="id48">
+<h2>Returns<a class="headerlink" href="#id48" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A DataFrame containing parsed GTF records. The columns correspond to
+GTF fields such as “gene_name”, “gene_type”, “start”, “end”, etc.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-preprocessing_pipeline.download">
+<span id="module-preprocessing_pipeline.config"></span><dt class="sig sig-object py" id="preprocessing_pipeline.download.download_file">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.download.</span></span><span class="sig-name descname"><span class="pre">download_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/download.html#download_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.download.download_file" title="Link to this definition">#</a></dt>
+<dd><p>Download a file from a given URL and save it locally using the <cite>wget</cite> command.</p>
+<section id="id49">
+<h2>Parameters<a class="headerlink" href="#id49" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>url<span class="classifier">str</span></dt><dd><p>The URL to download from.</p>
+</dd>
+<dt>out_path<span class="classifier">pathlib.Path</span></dt><dd><p>The local file path where the downloaded file will be saved.</p>
+</dd>
+</dl>
+</section>
+<section id="id50">
+<h2>Returns<a class="headerlink" href="#id50" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>If the file already exists, no download is performed. Otherwise, runs
+a shell command with <cite>wget</cite> to fetch the file.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.download.download_genome_references">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.download.</span></span><span class="sig-name descname"><span class="pre">download_genome_references</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">genome_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtf_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom_sizes_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fasta_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/download.html#download_genome_references"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.download.download_genome_references" title="Link to this definition">#</a></dt>
+<dd><p>Download reference genome files (GTF, chrom.sizes, FASTA) for a given species and assembly.</p>
+<ol class="arabic simple">
+<li><p>Resolve the URLs from user input or known defaults for recognized combos (mouse/mm10, human/hg38).</p></li>
+<li><p>Download each file if not already present.</p></li>
+<li><p>Decompress .gz files for GTF and FASTA.</p></li>
+</ol>
+<section id="id51">
+<h2>Parameters<a class="headerlink" href="#id51" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>genome_dir<span class="classifier">pathlib.Path</span></dt><dd><p>Directory where the reference files will be downloaded.</p>
+</dd>
+<dt>species<span class="classifier">str</span></dt><dd><p>Species name (e.g. “mouse”, “human”).</p>
+</dd>
+<dt>assembly<span class="classifier">str</span></dt><dd><p>Genome assembly version (e.g. “mm10”, “hg38”).</p>
+</dd>
+<dt>gtf_url<span class="classifier">str, optional</span></dt><dd><p>GTF file URL to override defaults. If None, use known default (if available).</p>
+</dd>
+<dt>chrom_sizes_url<span class="classifier">str, optional</span></dt><dd><p>Chromosome sizes file URL to override defaults. If None, use known default (if available).</p>
+</dd>
+<dt>fasta_url<span class="classifier">str, optional</span></dt><dd><p>FASTA file URL to override defaults. If None, use known default (if available).</p>
+</dd>
+</dl>
+</section>
+<section id="id52">
+<h2>Returns<a class="headerlink" href="#id52" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Files are downloaded into <cite>genome_dir</cite>. If a file already exists, no new download occurs.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.download.resolve_genome_urls">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.download.</span></span><span class="sig-name descname"><span class="pre">resolve_genome_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtf_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom_sizes_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fasta_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/download.html#resolve_genome_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.download.resolve_genome_urls" title="Link to this definition">#</a></dt>
+<dd><p>Resolve final URLs for GTF, chromosome sizes, and FASTA files based on species and assembly.</p>
+<ol class="arabic simple">
+<li><p>If user provides URLs (gtf_url, chrom_sizes_url, fasta_url), use them directly.</p></li>
+<li><p>If not, attempt to use known defaults for recognized combos (e.g. mouse/mm10, human/hg38).</p></li>
+<li><p>If the combo is unrecognized and the user hasn’t provided all URLs, raise an error.</p></li>
+</ol>
+<section id="id53">
+<h2>Parameters<a class="headerlink" href="#id53" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>species<span class="classifier">str</span></dt><dd><p>Species name (e.g. “mouse”, “human”).</p>
+</dd>
+<dt>assembly<span class="classifier">str</span></dt><dd><p>Genome assembly (e.g. “mm10”, “hg38”).</p>
+</dd>
+<dt>gtf_url<span class="classifier">str or None</span></dt><dd><p>A user-provided URL for the GTF file, or None to try defaults.</p>
+</dd>
+<dt>chrom_sizes_url<span class="classifier">str or None</span></dt><dd><p>A user-provided URL for the chromosome sizes file, or None to try defaults.</p>
+</dd>
+<dt>fasta_url<span class="classifier">str or None</span></dt><dd><p>A user-provided URL for the FASTA file, or None to try defaults.</p>
+</dd>
+</dl>
+</section>
+<section id="id54">
+<h2>Returns<a class="headerlink" href="#id54" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>(final_gtf_url, final_chrom_sizes_url, final_fasta_url)<span class="classifier">tuple of str</span></dt><dd><p>The resolved URLs for GTF, chromosome sizes, and FASTA. These may come from
+user-provided values or known defaults if recognized. If no defaults
+exist and user inputs are missing, raises ValueError.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="preprocessing_pipeline.download.unzip_gz">
+<span class="sig-prename descclassname"><span class="pre">preprocessing_pipeline.download.</span></span><span class="sig-name descname"><span class="pre">unzip_gz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/preprocessing_pipeline/download.html#unzip_gz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing_pipeline.download.unzip_gz" title="Link to this definition">#</a></dt>
+<dd><p>Decompress a GZIP file (i.e., <cite>.gz</cite>) in-place using <cite>gzip -d</cite>.</p>
+<section id="id55">
+<h2>Parameters<a class="headerlink" href="#id55" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>file_path<span class="classifier">pathlib.Path</span></dt><dd><p>Path to the <cite>.gz</cite> file to be decompressed.</p>
+</dd>
+<dt>remove_input<span class="classifier">bool, optional</span></dt><dd><p>If True, delete the original <cite>.gz</cite> file after successful decompression.
+Default is False.</p>
+</dd>
+</dl>
+</section>
+<section id="id56">
+<h2>Returns<a class="headerlink" href="#id56" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Decompresses the file in-place, leaving a new file without the <cite>.gz</cite> extension.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="api_reference.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="scdori.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">scDORI training</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.data_io.create_dir_if_not_exists"><code class="docutils literal notranslate"><span class="pre">create_dir_if_not_exists()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.data_io.load_anndata"><code class="docutils literal notranslate"><span class="pre">load_anndata()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.data_io.save_processed_datasets"><code class="docutils literal notranslate"><span class="pre">save_processed_datasets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.filtering.intersect_cells"><code class="docutils literal notranslate"><span class="pre">intersect_cells()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.filtering.remove_mitochondrial_genes"><code class="docutils literal notranslate"><span class="pre">remove_mitochondrial_genes()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.correlation.compute_in_silico_chipseq"><code class="docutils literal notranslate"><span class="pre">compute_in_silico_chipseq()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.utils.compute_gene_peak_distance_matrix"><code class="docutils literal notranslate"><span class="pre">compute_gene_peak_distance_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.utils.create_extended_gene_bed"><code class="docutils literal notranslate"><span class="pre">create_extended_gene_bed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.peak_selection.keep_promoters_and_select_hv_peaks"><code class="docutils literal notranslate"><span class="pre">keep_promoters_and_select_hv_peaks()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.peak_selection.select_highly_variable_peaks_by_std"><code class="docutils literal notranslate"><span class="pre">select_highly_variable_peaks_by_std()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.motif_scanning.compute_motif_scores"><code class="docutils literal notranslate"><span class="pre">compute_motif_scores()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.motif_scanning.load_motif_database"><code class="docutils literal notranslate"><span class="pre">load_motif_database()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.motif_scanning.run_bedtools_intersect"><code class="docutils literal notranslate"><span class="pre">run_bedtools_intersect()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.motif_scanning.simulate_pwm_scoring"><code class="docutils literal notranslate"><span class="pre">simulate_pwm_scoring()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.metacells.create_metacells"><code class="docutils literal notranslate"><span class="pre">create_metacells()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.gene_selection.compute_hvgs_and_tfs"><code class="docutils literal notranslate"><span class="pre">compute_hvgs_and_tfs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.gene_selection.filter_protein_coding_genes"><code class="docutils literal notranslate"><span class="pre">filter_protein_coding_genes()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.gene_selection.load_gtf"><code class="docutils literal notranslate"><span class="pre">load_gtf()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.download.download_file"><code class="docutils literal notranslate"><span class="pre">download_file()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.download.download_genome_references"><code class="docutils literal notranslate"><span class="pre">download_genome_references()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.download.resolve_genome_urls"><code class="docutils literal notranslate"><span class="pre">resolve_genome_urls()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing_pipeline.download.unzip_gz"><code class="docutils literal notranslate"><span class="pre">unzip_gz()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/preprocessing_pipeline.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Manu Saraswat.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

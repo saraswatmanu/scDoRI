@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>preprocessing_pipeline.utils &#8212; scDoRI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for preprocessing_pipeline.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">anndata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ad</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="create_extended_gene_bed">
+<a class="viewcode-back" href="../../preprocessing_pipeline.html#preprocessing_pipeline.utils.create_extended_gene_bed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_extended_gene_bed</span><span class="p">(</span>
+    <span class="n">gtf_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">final_genes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">chrom_sizes_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an extended gene BED-like DataFrame by adding a window around each gene.</span>
+
+<span class="sd">    For each gene in `final_genes`, take the gene feature from `gtf_df` and extend</span>
+<span class="sd">    the start and end coordinates by `window_size`. If a chromosome sizes file is</span>
+<span class="sd">    provided, clamp the extended coordinates within valid chromosome boundaries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gtf_df : pd.DataFrame</span>
+<span class="sd">        A DataFrame containing GTF entries (e.g., loaded by gtfparse). Expected columns:</span>
+<span class="sd">        [&quot;feature&quot;, &quot;gene_name&quot;, &quot;seqname&quot;, &quot;start&quot;, &quot;end&quot;, &quot;strand&quot;, ...].</span>
+<span class="sd">    final_genes : list of str</span>
+<span class="sd">        The list of gene names to be extended.</span>
+<span class="sd">    window_size : int</span>
+<span class="sd">        The number of base pairs to extend on each side of the gene.</span>
+<span class="sd">    chrom_sizes_path : pathlib.Path, optional</span>
+<span class="sd">        A path to a tab-delimited file of chromosome sizes (e.g., from UCSC),</span>
+<span class="sd">        with columns [chrom, size]. If provided, coordinates are clamped to [0, chrom_size].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        A DataFrame with columns [&quot;chr&quot;, &quot;start_new&quot;, &quot;end_new&quot;, &quot;gene_name&quot;, &quot;strand&quot;]</span>
+<span class="sd">        representing the extended regions for each gene.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Only rows with `feature == &quot;gene&quot;` are considered in the GTF.</span>
+<span class="sd">    - If a gene is not found in `gtf_df`, it is omitted.</span>
+<span class="sd">    - The `chr` column is set from the GTF&#39;s &quot;seqname&quot; field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Filter for final genes &amp; gene features</span>
+    <span class="n">gtf_gene</span> <span class="o">=</span> <span class="n">gtf_df</span><span class="p">[</span><span class="n">gtf_df</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;gene&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s2">&quot;gene_name&quot;</span><span class="p">)</span>
+    <span class="n">gtf_gene</span> <span class="o">=</span> <span class="n">gtf_gene</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;gene_name&quot;</span><span class="p">)</span>
+    <span class="n">gtf_gene</span> <span class="o">=</span> <span class="n">gtf_gene</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">final_genes</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">gtf_gene</span><span class="o">.</span><span class="n">index</span><span class="p">))]</span>
+
+    <span class="c1"># rename for clarity</span>
+    <span class="n">gtf_gene</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gtf_gene</span><span class="p">[</span><span class="s2">&quot;seqname&quot;</span><span class="p">]</span>
+
+    <span class="c1"># If we want clamping, load chrom.sizes</span>
+    <span class="n">chrom_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">chrom_sizes_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">chrom_sizes_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">chrom_sizes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">chrom_sizes_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chrom&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">])</span>
+        <span class="n">chrom_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">chrom_sizes</span><span class="p">[</span><span class="s2">&quot;chrom&quot;</span><span class="p">],</span> <span class="n">chrom_sizes</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]))</span>
+
+    <span class="n">extended_rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gtf_gene</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">gtf_gene</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
+        <span class="n">chr_</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span>
+        <span class="n">start_</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
+        <span class="n">end_</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
+        <span class="n">strand_</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;strand&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;strand&quot;</span> <span class="ow">in</span> <span class="n">row</span> <span class="k">else</span> <span class="s2">&quot;+&quot;</span>
+
+        <span class="n">start_extended</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span>
+        <span class="n">end_extended</span> <span class="o">=</span> <span class="n">end_</span> <span class="o">+</span> <span class="n">window_size</span>
+
+        <span class="k">if</span> <span class="n">chr_</span> <span class="ow">in</span> <span class="n">chrom_dict</span><span class="p">:</span>
+            <span class="n">chr_len</span> <span class="o">=</span> <span class="n">chrom_dict</span><span class="p">[</span><span class="n">chr_</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">end_extended</span> <span class="o">&gt;</span> <span class="n">chr_len</span><span class="p">:</span>
+                <span class="n">end_extended</span> <span class="o">=</span> <span class="n">chr_len</span>
+            <span class="c1"># start_extended already clamped to 0 above</span>
+
+        <span class="n">extended_rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span>
+            <span class="n">chr_</span><span class="p">,</span>
+            <span class="n">start_extended</span><span class="p">,</span>
+            <span class="n">end_extended</span><span class="p">,</span>
+            <span class="n">gene</span><span class="p">,</span>
+            <span class="n">strand_</span>
+        <span class="p">])</span>
+
+    <span class="n">df_extended</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">extended_rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;start_new&quot;</span><span class="p">,</span> <span class="s2">&quot;end_new&quot;</span><span class="p">,</span> <span class="s2">&quot;gene_name&quot;</span><span class="p">,</span> <span class="s2">&quot;strand&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df_extended</span></div>
+
+
+<div class="viewcode-block" id="compute_gene_peak_distance_matrix">
+<a class="viewcode-back" href="../../preprocessing_pipeline.html#preprocessing_pipeline.utils.compute_gene_peak_distance_matrix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_gene_peak_distance_matrix</span><span class="p">(</span>
+    <span class="n">data_atac</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">data_rna</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">gene_coordinates_intersect</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a distance matrix between peaks (ATAC) and genes (RNA), accounting for strand.</span>
+
+<span class="sd">    This function:</span>
+<span class="sd">    -----</span>
+<span class="sd">    1. Expects the ATAC data (`data_atac.var`) to have columns &quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, and &quot;peak_name&quot;.</span>
+<span class="sd">    2. Expects the gene coordinates DataFrame (`gene_coordinates_intersect`) to have columns</span>
+<span class="sd">        [&quot;chr_gene&quot;, &quot;start&quot;, &quot;end&quot;, &quot;strand&quot;, &quot;gene&quot;].</span>
+<span class="sd">    3. For each gene, we compute a distance to each peak by:</span>
+<span class="sd">        - 0 if the peak midpoint is within gene-body or promoter (5kb upstream of TSS by default),</span>
+<span class="sd">        e.g., if on the &quot;+&quot; strand and midpoint is between (start - 5000) and end =&gt; distance=0.</span>
+<span class="sd">        If on the &quot;-&quot; strand and midpoint is between start and (end + 5000) =&gt; distance=0.</span>
+<span class="sd">        - Otherwise, distance = min(|mid - start|, |mid - end|).</span>
+<span class="sd">        - If the chromosome of the gene != chromosome of the peak =&gt; distance = -1.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_atac : pd.DataFrame</span>
+<span class="sd">        The ATAC dataset. Its `.var` should contain &quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, &quot;peak_name&quot;.</span>
+<span class="sd">    data_rna : pd.DataFrame</span>
+<span class="sd">        The RNA dataset. Its `.var` is expected to have gene names as indices or relevant columns.</span>
+<span class="sd">    gene_coordinates_intersect : pd.DataFrame</span>
+<span class="sd">        A DataFrame with gene info, columns at least:</span>
+<span class="sd">        [&quot;chr_gene&quot;, &quot;start&quot;, &quot;end&quot;, &quot;strand&quot;, &quot;gene&quot;].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A 2D NumPy array of shape (n_genes, n_peaks) representing gene-peak distances.</span>
+<span class="sd">        Each row corresponds to a gene (matching `data_rna.var.index`),</span>
+<span class="sd">        and each column corresponds to a peak (matching `data_atac.var.index` order).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting computation of gene-peak distances...&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of genes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_rna</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s2">, Number of peaks: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ATAC var columns: </span><span class="si">{</span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s1">&#39;chr&#39;</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;chr&#39; column is missing in data_atac.var!&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;start&#39;</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;start&#39; column is missing in data_atac.var!&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;end&#39; column is missing in data_atac.var!&quot;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gene coordinates columns: </span><span class="si">{</span><span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s1">&#39;chr_gene&#39;</span> <span class="ow">in</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;chr_gene&#39; column is missing!&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;start&#39;</span> <span class="ow">in</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;start&#39; column is missing!&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;end&#39; column is missing!&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;strand&#39;</span> <span class="ow">in</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;&#39;strand&#39; column is missing!&quot;</span>
+
+    <span class="n">peak_gene_distance</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Add midpoints to peaks in the ATAC data</span>
+    <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;mid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">])</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Added midpoint column to ATAC peaks.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over all genes</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">data_rna</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_rna</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">)):</span>
+        <span class="n">chr_gene</span> <span class="o">=</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene</span><span class="p">,</span> <span class="s2">&quot;chr_gene&quot;</span><span class="p">]</span>
+        <span class="n">start_gene</span> <span class="o">=</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">]</span>
+        <span class="n">end_gene</span> <span class="o">=</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">]</span>
+        <span class="n">strand_gene</span> <span class="o">=</span> <span class="n">gene_coordinates_intersect</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene</span><span class="p">,</span> <span class="s2">&quot;strand&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Build pairs of all peaks with this gene</span>
+        <span class="n">atac_var_all</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="n">gene</span><span class="p">]),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">,</span> <span class="s2">&quot;gene&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Merge to get peak coordinates</span>
+        <span class="n">atac_var_all</span> <span class="o">=</span> <span class="n">atac_var_all</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">,</span> <span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;mid&quot;</span><span class="p">]],</span>
+            <span class="n">on</span><span class="o">=</span><span class="s2">&quot;peak_name&quot;</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span>
+        <span class="p">)</span>
+        <span class="n">atac_var_all</span> <span class="o">=</span> <span class="n">atac_var_all</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">gene_coordinates_intersect</span><span class="p">[[</span><span class="s2">&quot;gene&quot;</span><span class="p">,</span> <span class="s2">&quot;chr_gene&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">]],</span>
+            <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gene&quot;</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">atac_var_all</span><span class="p">[</span><span class="s2">&quot;mid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">start_arr</span> <span class="o">=</span> <span class="n">atac_var_all</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">end_arr</span> <span class="o">=</span> <span class="n">atac_var_all</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="n">strand_gene</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span>
+            <span class="c1"># Zero distance if peak midpoint is between [start_gene - 5000, end_gene]</span>
+            <span class="n">within_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">mid</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">start_arr</span> <span class="o">-</span> <span class="mi">5000</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mid</span> <span class="o">&lt;=</span> <span class="n">end_arr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Zero distance if peak midpoint is between [start_gene, end_gene + 5000]</span>
+            <span class="n">within_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">mid</span> <span class="o">&gt;=</span> <span class="n">start_arr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mid</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">end_arr</span> <span class="o">+</span> <span class="mi">5000</span><span class="p">))</span>
+
+        <span class="n">dist_to_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mid</span> <span class="o">-</span> <span class="n">start_arr</span><span class="p">)</span>
+        <span class="n">dist_to_end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mid</span> <span class="o">-</span> <span class="n">end_arr</span><span class="p">)</span>
+        <span class="n">min_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">dist_to_start</span><span class="p">,</span> <span class="n">dist_to_end</span><span class="p">)</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">within_mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">)</span>
+
+        <span class="c1"># If chromosome doesn&#39;t match</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">atac_var_all</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">atac_var_all</span><span class="p">[</span><span class="s2">&quot;chr_gene&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">distance</span><span class="p">,</span>
+            <span class="o">-</span><span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="n">peak_gene_distance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+
+        <span class="c1"># Optional debug checkpoint</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_gene_distance</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_gene_distance</span><span class="p">)</span><span class="si">}</span><span class="s2"> genes so far.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert to NumPy array =&gt; shape (n_genes, n_peaks)</span>
+    <span class="n">peak_gene_distance_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">peak_gene_distance</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gene-peak distance matrix computed with shape: </span><span class="si">{</span><span class="n">peak_gene_distance_matrix</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">peak_gene_distance_matrix</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scDoRI</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocessing_pipeline.html">Preprocessing Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scdori.html">scDORI training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Notebook Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Manu Saraswat.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

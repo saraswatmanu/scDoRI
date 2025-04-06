@@ -1,0 +1,1826 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>scDORI training &#8212; scDoRI  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'scdori';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Preprocessing Pipeline" href="preprocessing_pipeline.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">scDoRI  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="preprocessing_pipeline.html">Preprocessing Pipeline</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">scDORI training</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="api_reference.html" class="nav-link">API Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">scDORI training</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-scdori.train_grn">
+<span id="scdori-training"></span><h1>scDORI training<a class="headerlink" href="#module-scdori.train_grn" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.compute_eval_loss_grn">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">compute_eval_loss_grn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#compute_eval_loss_grn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.compute_eval_loss_grn" title="Link to this definition">#</a></dt>
+<dd><p>Compute the validation (evaluation) loss for the GRN phase.</p>
+<p>This function evaluates loss components for ATAC, TF, RNA, and RNA-from-GRN
+on a validation dataset.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch tensors.</p>
+</dd>
+<dt>train_loader<span class="classifier">DataLoader</span></dt><dd><p>DataLoader for the training set (used to compute TF expression).</p>
+</dd>
+<dt>eval_loader<span class="classifier">DataLoader</span></dt><dd><p>DataLoader for the validation set.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>number of cells constituting each input metacell, set to 1 for single cell data</p>
+</dd>
+<dt>tf_indices<span class="classifier">list of int</span></dt><dd><p>Indices of TF features in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding for batch information.</p>
+</dd>
+<dt>config_file<span class="classifier">python file</span></dt><dd><p>Configuration file for model training.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple of float</dt><dd><p>A tuple containing:
+(eval_loss, eval_loss_atac, eval_loss_tf, eval_loss_rna, eval_loss_rna_grn).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.get_tf_expression">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">get_tf_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tf_expression_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#get_tf_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.get_tf_expression" title="Link to this definition">#</a></dt>
+<dd><p>Compute TF expression per topic.</p>
+<p>If <cite>tf_expression_mode</cite> is “True”, this function computes the mean TF expression
+for the top-k cells in each topic. Otherwise, it uses a normalized topic-TF
+decoder matrix from the model.</p>
+<section id="id1">
+<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tf_expression_mode<span class="classifier">str</span></dt><dd><p>Mode for TF expression. “True” calculates per-topic TF expression from top-k cells,
+“latent” uses the topic-TF decoder matrix.</p>
+</dd>
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model containing encoder and decoder modules.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch tensors.</p>
+</dd>
+<dt>train_loader<span class="classifier">DataLoader</span></dt><dd><p>DataLoader for training data.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>number of cells constituting each input metacell, set to 1 for single cell data.</p>
+</dd>
+<dt>tf_indices<span class="classifier">list of int</span></dt><dd><p>Indices of TF features in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding for batch information.</p>
+</dd>
+<dt>config_file<span class="classifier">python file</span></dt><dd><p>Configuration object with model training.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Returns<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>A (num_topics x num_tfs) tensor of TF expression values for each topic.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.set_encoder_frozen">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">set_encoder_frozen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#set_encoder_frozen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.set_encoder_frozen" title="Link to this definition">#</a></dt>
+<dd><p>Freeze or unfreeze the encoder parameters.</p>
+<section id="id3">
+<h2>Parameters<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>scDoRI model containing the encoder modules.</p>
+</dd>
+<dt>freeze<span class="classifier">bool, optional</span></dt><dd><p>If True, freeze the encoder parameters; if False, unfreeze them. Default is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.set_peak_gene_frozen">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">set_peak_gene_frozen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#set_peak_gene_frozen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.set_peak_gene_frozen" title="Link to this definition">#</a></dt>
+<dd><p>Freeze or unfreeze the peak-gene link parameters.</p>
+<section id="id4">
+<h2>Parameters<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>scDoRI model containing the peak-gene factor.</p>
+</dd>
+<dt>freeze<span class="classifier">bool, optional</span></dt><dd><p>If True, freeze the peak-gene parameters; if False, unfreeze them. Default is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.set_topic_peak_frozen">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">set_topic_peak_frozen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#set_topic_peak_frozen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.set_topic_peak_frozen" title="Link to this definition">#</a></dt>
+<dd><p>Freeze or unfreeze the topic-peak decoder parameters.</p>
+<section id="id5">
+<h2>Parameters<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>scDoRI model containing the topic-peak decoder.</p>
+</dd>
+<dt>freeze<span class="classifier">bool, optional</span></dt><dd><p>If True, freeze the topic-peak decoder; if False, unfreeze it. Default is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.set_topic_tf_frozen">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">set_topic_tf_frozen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#set_topic_tf_frozen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.set_topic_tf_frozen" title="Link to this definition">#</a></dt>
+<dd><p>Freeze or unfreeze the topic-TF decoder parameters.</p>
+<section id="id6">
+<h2>Parameters<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>scDoRI model containing the topic-TF decoder.</p>
+</dd>
+<dt>freeze<span class="classifier">bool, optional</span></dt><dd><p>If True, freeze the topic-TF decoder; if False, unfreeze it. Default is True.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_grn.train_model_grn">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_grn.</span></span><span class="sig-name descname"><span class="pre">train_model_grn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_grn.html#train_model_grn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_grn.train_model_grn" title="Link to this definition">#</a></dt>
+<dd><p>Train the model in Phase 2 (GRN phase).</p>
+<p>In this phase, the model focuses on learning activator and repressor TF-gene links per topic (module 4 of scDoRI). Other modules of the model can be optionally frozen
+or unfrozen based on the configuration.</p>
+<section id="id7">
+<h2>Parameters<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model to train.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch tensors.</p>
+</dd>
+<dt>train_loader<span class="classifier">DataLoader</span></dt><dd><p>DataLoader for the training set.</p>
+</dd>
+<dt>eval_loader<span class="classifier">DataLoader</span></dt><dd><p>DataLoader for the validation set, used to check early stopping criteria.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>number of cells constituting each input metacell, set to 1 for single cell data</p>
+</dd>
+<dt>tf_indices<span class="classifier">list of int</span></dt><dd><p>Indices of TF features in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding for batch information.</p>
+</dd>
+<dt>config_file<span class="classifier">python file</span></dt><dd><p>Configuration file for model training.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h2>Returns<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>torch.nn.Module</dt><dd><p>The trained model after the GRN phase completes or early stopping occurs.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p id="module-scdori.config">Global configuration for the scDoRI modeling pipeline.</p>
+<p>This file defines top-level constants and parameters controlling:</p>
+<ol class="arabic simple">
+<li><p>Logging</p></li>
+<li><p>File paths for data and outputs</p></li>
+<li><p>Model architecture details (numbers of topics, hidden dimensions)</p></li>
+<li><p>Training phases and hyperparameters</p></li>
+<li><p>Loss weighting for different data modalities (ATAC, TF, RNA)</p></li>
+<li><p>Regularization and early stopping settings</p></li>
+<li><p>Significance testing cutoffs for TF-gene links</p></li>
+<li><p>UMAP parameters for visualization</p></li>
+</ol>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>logging_level<span class="classifier">int</span></dt><dd><p>The Python logging level (e.g., logging.INFO).</p>
+</dd>
+<dt>data_dir<span class="classifier">Path</span></dt><dd><p>Base directory containing the processed anndata and other precomputed files.</p>
+</dd>
+<dt>output_subdir<span class="classifier">str</span></dt><dd><p>Subdirectory name within data_dir for storing or accessing outputs.</p>
+</dd>
+<dt>rna_metacell_file<span class="classifier">str</span></dt><dd><p>Name of the H5AD file containing RNA data.</p>
+</dd>
+<dt>atac_metacell_file<span class="classifier">str</span></dt><dd><p>Name of the H5AD file containing ATAC data.</p>
+</dd>
+<dt>batch_col<span class="classifier">str</span></dt><dd><p>Key for the batch column in the AnnData object.</p>
+</dd>
+<dt>gene_peak_distance_file<span class="classifier">str</span></dt><dd><p>Filename for the NumPy array containing gene-peak distances.</p>
+</dd>
+<dt>insilico_chipseq_act_file<span class="classifier">str</span></dt><dd><p>Filename for the in silico ChIP-seq activator embeddings.</p>
+</dd>
+<dt>insilico_chipseq_rep_file<span class="classifier">str</span></dt><dd><p>Filename for the in silico ChIP-seq repressor embeddings.</p>
+</dd>
+<dt>random_seed<span class="classifier">int</span></dt><dd><p>Random seed for reproducibility.</p>
+</dd>
+<dt>batch_size_cell<span class="classifier">int</span></dt><dd><p>Batch size for training.</p>
+</dd>
+<dt>dim_encoder1<span class="classifier">int</span></dt><dd><p>Dimension of the first encoder layer.</p>
+</dd>
+<dt>dim_encoder2<span class="classifier">int</span></dt><dd><p>Dimension of the second encoder layer.</p>
+</dd>
+<dt>num_topics<span class="classifier">int</span></dt><dd><p>Number of latent topics for scDoRI.</p>
+</dd>
+<dt>batch_size_cell_prediction<span class="classifier">int</span></dt><dd><p>Batch size when making predictions in eval mode (e.g., forward passes only).</p>
+</dd>
+<dt>epoch_warmup_1<span class="classifier">int</span></dt><dd><p>Number of epochs to run “warmup_1” (ATAC+TF) before adding RNA.</p>
+</dd>
+<dt>max_scdori_epochs<span class="classifier">int</span></dt><dd><p>Maximum number of epochs for the scDoRI phase 1 training (module 1,2,3).</p>
+</dd>
+<dt>max_grn_epochs<span class="classifier">int</span></dt><dd><p>Maximum number of epochs for the GRN training phase (module 4).</p>
+</dd>
+<dt>update_encoder_in_grn<span class="classifier">bool</span></dt><dd><p>Whether to unfreeze the encoder during the GRN phase.</p>
+</dd>
+<dt>update_peak_gene_in_grn<span class="classifier">bool</span></dt><dd><p>Whether to unfreeze the peak-gene links in the GRN phase.</p>
+</dd>
+<dt>update_topic_peak_in_grn<span class="classifier">bool</span></dt><dd><p>Whether to unfreeze the topic-peak links in the GRN phase.</p>
+</dd>
+<dt>update_topic_tf_in_grn<span class="classifier">bool</span></dt><dd><p>Whether to unfreeze the topic-TF links in the GRN phase.</p>
+</dd>
+<dt>eval_frequency<span class="classifier">int</span></dt><dd><p>How often (in epochs) to evaluate validation loss.</p>
+</dd>
+<dt>phase1_patience<span class="classifier">int</span></dt><dd><p>Early stopping patience (in epochs) for phase 1 training (module 1,2 3).</p>
+</dd>
+<dt>grn_val_patience<span class="classifier">int</span></dt><dd><p>Early stopping patience (in epochs) for the GRN phase.</p>
+</dd>
+<dt>learning_rate_scdori<span class="classifier">float</span></dt><dd><p>Learning rate for scDoRI phase 1 training (module 1,2 3).</p>
+</dd>
+<dt>learning_rate_grn<span class="classifier">float</span></dt><dd><p>Learning rate for the GRN training phase.</p>
+</dd>
+<dt>weight_atac_phase1<span class="classifier">float</span></dt><dd><p>Loss weight for ATAC reconstruction in Phase 1:warmup_1.</p>
+</dd>
+<dt>weight_tf_phase1<span class="classifier">float</span></dt><dd><p>Loss weight for TF reconstruction in Phase 1:warmup_1.</p>
+</dd>
+<dt>weight_rna_phase1<span class="classifier">float</span></dt><dd><p>Loss weight for RNA reconstruction in Phase 1:warmup_1. set to 0.</p>
+</dd>
+<dt>weight_rna_grn_phase1<span class="classifier">float</span></dt><dd><p>Loss weight for GRN-based RNA reconstruction in Phase 1:warmup_1. set to 0.</p>
+</dd>
+<dt>weight_atac_phase2<span class="classifier">float</span></dt><dd><p>Loss weight for ATAC reconstruction in Phase 1:warmup_2.</p>
+</dd>
+<dt>weight_tf_phase2<span class="classifier">float</span></dt><dd><p>Loss weight for TF reconstruction in Phase 1:warmup_2.</p>
+</dd>
+<dt>weight_rna_phase2<span class="classifier">float</span></dt><dd><p>Loss weight for RNA reconstruction in Phase 1:warmup_2.</p>
+</dd>
+<dt>weight_rna_grn_phase2<span class="classifier">float</span></dt><dd><p>Loss weight for GRN-based RNA reconstruction in Phase 1:warmup_2. set to 0.</p>
+</dd>
+<dt>weight_atac_grn<span class="classifier">float</span></dt><dd><p>Loss weight for ATAC reconstruction in the GRN phase.</p>
+</dd>
+<dt>weight_tf_grn<span class="classifier">float</span></dt><dd><p>Loss weight for TF reconstruction in the GRN phase.</p>
+</dd>
+<dt>weight_rna_grn<span class="classifier">float</span></dt><dd><p>Loss weight for RNA reconstruction in the GRN phase.</p>
+</dd>
+<dt>weight_rna_from_grn<span class="classifier">float</span></dt><dd><p>Loss weight for the GRN-based RNA branch in the GRN phase.</p>
+</dd>
+<dt>l1_penalty_topic_tf<span class="classifier">float</span></dt><dd><p>L1 regularization coefficient on the topic_tf_decoder.</p>
+</dd>
+<dt>l2_penalty_topic_tf<span class="classifier">float</span></dt><dd><p>L2 regularization coefficient on the topic_tf_decoder.</p>
+</dd>
+<dt>l1_penalty_topic_peak<span class="classifier">float</span></dt><dd><p>L1 regularization coefficient on the topic_peak_decoder.</p>
+</dd>
+<dt>l2_penalty_topic_peak<span class="classifier">float</span></dt><dd><p>L2 regularization coefficient on the topic_peak_decoder.</p>
+</dd>
+<dt>l1_penalty_gene_peak<span class="classifier">float</span></dt><dd><p>L1 regularization coefficient on the gene_peak_factor_learnt.</p>
+</dd>
+<dt>l2_penalty_gene_peak<span class="classifier">float</span></dt><dd><p>L2 regularization coefficient on the gene_peak_factor_learnt.</p>
+</dd>
+<dt>l1_penalty_grn_activator<span class="classifier">float</span></dt><dd><p>L1 regularization on GRN activator parameters (tf_gene_topic_activator_grn).</p>
+</dd>
+<dt>l1_penalty_grn_repressor<span class="classifier">float</span></dt><dd><p>L1 regularization on GRN repressor parameters (tf_gene_topic_repressor_grn).</p>
+</dd>
+<dt>tf_expression_mode<span class="classifier">str</span></dt><dd><p>Either “True” (use actual TF expression) or “latent” (model’s predicted TF expression).</p>
+</dd>
+<dt>tf_expression_clamp<span class="classifier">float</span></dt><dd><p>Clamping threshold for TF expression values in [0, 1].</p>
+</dd>
+<dt>cells_per_topic<span class="classifier">int</span></dt><dd><p>Number of cells sampled per topic to compute topic-level TF expression.</p>
+</dd>
+<dt>weights_folder_scdori<span class="classifier">str</span></dt><dd><p>Folder to save model weights after the scDoRI Phase 1.</p>
+</dd>
+<dt>weights_folder_grn<span class="classifier">str</span></dt><dd><p>Folder to save model weights after the GRN phase.</p>
+</dd>
+<dt>best_scdori_model_path<span class="classifier">str</span></dt><dd><p>Filename for saving the best scDoRI model (Phase 1).</p>
+</dd>
+<dt>best_grn_model_path<span class="classifier">str</span></dt><dd><p>Filename for saving the best GRN model.</p>
+</dd>
+<dt>umap_n_neighbors<span class="classifier">int</span></dt><dd><p>Number of neighbors for UMAP.</p>
+</dd>
+<dt>umap_min_dist<span class="classifier">float</span></dt><dd><p>Min dist parameter for UMAP.</p>
+</dd>
+<dt>umap_random_state<span class="classifier">int</span></dt><dd><p>Random seed for UMAP.</p>
+</dd>
+<dt>significance_cutoffs<span class="classifier">list of float</span></dt><dd><p>List of thresholds for empirical p-value cutoffs in TF-gene link permutation tests.</p>
+</dd>
+<dt>num_permutations<span class="classifier">int</span></dt><dd><p>Number of permutations used to compute TF-gene link significance.</p>
+</dd>
+</dl>
+</section>
+<dl class="py function" id="module-scdori.models">
+<dt class="sig sig-object py" id="scdori.models.initialize_scdori_parameters">
+<span class="sig-prename descclassname"><span class="pre">scdori.models.</span></span><span class="sig-name descname"><span class="pre">initialize_scdori_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_peak_distance_exp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_peak_fixed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insilico_act</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insilico_rep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'warmup'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/models.html#initialize_scdori_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.models.initialize_scdori_parameters" title="Link to this definition">#</a></dt>
+<dd><p>Initialize or freeze certain scDoRI parameters, preparing for either warmup or GRN phases.</p>
+<section id="id9">
+<h2>Parameters<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>An instance of the scDoRI model.</p>
+</dd>
+<dt>gene_peak_distance_exp<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (num_genes, num_peaks). Peak-gene distance matrix, usually an exponential decay.</p>
+</dd>
+<dt>gene_peak_fixed<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (num_genes, num_peaks). A binary mask indicating allowable gene-peak links.</p>
+</dd>
+<dt>insilico_act<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (num_peaks, num_tfs). In silico ChIP-seq matrix for activators.</p>
+</dd>
+<dt>insilico_rep<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (num_peaks, num_tfs). In silico ChIP-seq matrix for repressors.</p>
+</dd>
+<dt>phase<span class="classifier">str, optional</span></dt><dd><p>“warmup” or “grn”. In “warmup”, sets gene-peak and TF-binding matrices,
+and keeps them fixed or partially trainable. In “grn”, enables TF-gene
+parameters to be trainable.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h2>Returns<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Modifies <cite>model</cite> in place, setting appropriate <cite>.data</cite> values and
+<cite>.requires_grad</cite> booleans.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scdori.models.scDoRI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scdori.models.</span></span><span class="sig-name descname"><span class="pre">scDoRI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_genes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_peaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_tfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_batches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_encoder1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_encoder2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/models.html#scDoRI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.models.scDoRI" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The scDoRI model integrates single cell multi-ome RNA and ATAC data to learn latent topic
+representations and perform gene regulatory network (GRN) inference.</p>
+<p>This model contains:
+- <strong>Encoders</strong> for RNA and ATAC, producing a shared topic distribution.
+- <strong>Decoders</strong> for ATAC, TF, and RNA reconstruction.
+- <strong>GRN logic</strong> for combining TF binding data with gene-peak links and tf expression to reconstruct RNA profiles.</p>
+<section id="id11">
+<h2>Parameters<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) for PyTorch operations.</p>
+</dd>
+<dt>num_genes<span class="classifier">int</span></dt><dd><p>Number of genes in the RNA data.</p>
+</dd>
+<dt>num_peaks<span class="classifier">int</span></dt><dd><p>Number of peaks in the ATAC data.</p>
+</dd>
+<dt>num_tfs<span class="classifier">int</span></dt><dd><p>Number of transcription factors being modeled.</p>
+</dd>
+<dt>num_topics<span class="classifier">int</span></dt><dd><p>Number of latent topics or factors.</p>
+</dd>
+<dt>num_batches<span class="classifier">int</span></dt><dd><p>Number of distinct batches (for batch correction).</p>
+</dd>
+<dt>dim_encoder1<span class="classifier">int</span></dt><dd><p>Dimension of the first encoder layer.</p>
+</dd>
+<dt>dim_encoder2<span class="classifier">int</span></dt><dd><p>Dimension of the second encoder layer.</p>
+</dd>
+<dt>batch_norm<span class="classifier">bool, optional</span></dt><dd><p>If True, use batch normalization in encoder and library factor MLPs. Default is True.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h2>Attributes<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>encoder_rna<span class="classifier">torch.nn.Sequential</span></dt><dd><p>The neural network layers for the RNA encoder.</p>
+</dd>
+<dt>encoder_atac<span class="classifier">torch.nn.Sequential</span></dt><dd><p>The neural network layers for the ATAC encoder.</p>
+</dd>
+<dt>mu_theta<span class="classifier">torch.nn.Linear</span></dt><dd><p>Linear layer converting combined RNA+ATAC encoder outputs into raw topic logits.</p>
+</dd>
+<dt>topic_peak_decoder<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_topics x num_peaks) parameter for ATAC reconstruction.</p>
+</dd>
+<dt>atac_batch_factor<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_batches x num_peaks) parameter for batch effects in ATAC.</p>
+</dd>
+<dt>atac_batch_norm<span class="classifier">torch.nn.BatchNorm1d</span></dt><dd><p>Batch normalization layer for ATAC predictions.</p>
+</dd>
+<dt>topic_tf_decoder<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_topics x num_tfs) parameter for TF expression reconstruction.</p>
+</dd>
+<dt>tf_batch_factor<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_batches x num_tfs) parameter for batch effects in TF reconstruction.</p>
+</dd>
+<dt>tf_batch_norm<span class="classifier">torch.nn.BatchNorm1d</span></dt><dd><p>Batch normalization layer for TF predictions.</p>
+</dd>
+<dt>tf_alpha_nb<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (1 x num_tfs) parameter for TF negative binomial overdispersion.</p>
+</dd>
+<dt>gene_peak_factor_learnt<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_genes x num_peaks) learned matrix linking peaks to genes.</p>
+</dd>
+<dt>gene_peak_factor_fixed<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_genes x num_peaks) fixed mask for feasible gene-peak links.</p>
+</dd>
+<dt>rna_batch_factor<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_batches x num_genes) parameter for batch effects in RNA reconstruction.</p>
+</dd>
+<dt>rna_batch_norm<span class="classifier">torch.nn.BatchNorm1d</span></dt><dd><p>Batch normalization layer for RNA predictions.</p>
+</dd>
+<dt>rna_alpha_nb<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (1 x num_genes) parameter for RNA negative binomial overdispersion.</p>
+</dd>
+<dt>tf_library_factor<span class="classifier">torch.nn.Sequential</span></dt><dd><p>An MLP to predict library scaling factor for TF data from the observed TF expression.</p>
+</dd>
+<dt>rna_library_factor<span class="classifier">torch.nn.Sequential</span></dt><dd><p>An MLP to predict library scaling factor for RNA data from the observed gene counts.</p>
+</dd>
+<dt>tf_binding_matrix_activator<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_peaks x num_tfs) matrix of in silico ChIP-seq (activator) TF-peak binding; precomputed and fixed.</p>
+</dd>
+<dt>tf_binding_matrix_repressor<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_peaks x num_tfs) matrix of in silico ChIP-seq (repressor) TF-peak binding; precomputed and fixed.</p>
+</dd>
+<dt>tf_gene_topic_activator_grn<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_topics x num_tfs x num_genes) matrix capturing per-topic activator regulation.</p>
+</dd>
+<dt>tf_gene_topic_repressor_grn<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_topics x num_tfs x num_genes) matrix capturing per-topic repressor regulation.</p>
+</dd>
+<dt>rna_grn_batch_factor<span class="classifier">torch.nn.Parameter</span></dt><dd><p>A (num_batches x num_genes) batch-effect parameter for the GRN-based RNA reconstruction (module 4).</p>
+</dd>
+<dt>rna_grn_batch_norm<span class="classifier">torch.nn.BatchNorm1d</span></dt><dd><p>Batch normalization layer for GRN-based RNA predictions.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scdori.models.scDoRI.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rna_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_lib_rna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_lib_atac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/models.html#scDoRI.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.models.scDoRI.encode" title="Link to this definition">#</a></dt>
+<dd><p>Encode RNA and ATAC input into a topic distribution (theta).</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>rna_input<span class="classifier">torch.Tensor</span></dt><dd><p>A (B, num_genes) tensor of RNA counts per cell.</p>
+</dd>
+<dt>atac_input<span class="classifier">torch.Tensor</span></dt><dd><p>A (B, num_peaks) tensor of ATAC counts per cell.</p>
+</dd>
+<dt>log_lib_rna<span class="classifier">torch.Tensor</span></dt><dd><p>A (B, 1) tensor of log RNA library sizes.</p>
+</dd>
+<dt>log_lib_atac<span class="classifier">torch.Tensor</span></dt><dd><p>A (B, 1) tensor of log ATAC library sizes.</p>
+</dd>
+<dt>num_cells<span class="classifier">torch.Tensor</span></dt><dd><p>A (B, 1) tensor representing how many cells are aggregated (if metacells),
+or all ones for single-cell data.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h3>Returns<a class="headerlink" href="#id14" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>(theta, mu_theta)<span class="classifier">tuple of torch.Tensor</span></dt><dd><p>theta    : (B, num_topics), softmaxed topic distribution.
+mu_theta : (B, num_topics), raw topic logits.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scdori.models.scDoRI.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rna_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_tf_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_lib_rna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_lib_atac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'warmup_1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/models.html#scDoRI.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.models.scDoRI.forward" title="Link to this definition">#</a></dt>
+<dd><p>Forward pass through scDoRI, producing predictions for ATAC, TF, and RNA 
+reconstructions (Phase 1), as well as GRN-based RNA predictions in GRN phase (Phase 2).</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>rna_input<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, num_genes). RNA counts per cell in the batch.</p>
+</dd>
+<dt>atac_input<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, num_peaks). ATAC counts per cell in the batch.</p>
+</dd>
+<dt>tf_input<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, num_tfs). Observed TF expression.</p>
+</dd>
+<dt>topic_tf_input<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (num_topics, num_tfs). TF expression aggregated by topic,
+used only if phase == “grn”.</p>
+</dd>
+<dt>log_lib_rna<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, 1). Log of RNA library sizes.</p>
+</dd>
+<dt>log_lib_atac<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, 1). Log of ATAC library sizes.</p>
+</dd>
+<dt>num_cells<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, 1). Number of cells aggregated (if metacells), else ones.</p>
+</dd>
+<dt>batch_onehot<span class="classifier">torch.Tensor</span></dt><dd><p>Shape (B, num_batches). One-hot batch encoding for each cell.</p>
+</dd>
+<dt>phase<span class="classifier">str, optional</span></dt><dd><p>Which training phase: “warmup_1”, “warmup_2”, or “grn”. 
+If phase==”grn”, the GRN-based RNA predictions are included.</p>
+</dd>
+</dl>
+</section>
+<section id="id16">
+<h3>Returns<a class="headerlink" href="#id16" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>dict</dt><dd><p>A dictionary with the following keys:
+- “theta”: (B, num_topics), the softmaxed topic distribution.
+- “mu_theta”: (B, num_topics), raw topic logits.
+- “preds_atac”: (B, num_peaks), predicted peak accessibility.
+- “preds_tf”: (B, num_tfs), predicted TF expression.
+- “mu_nb_tf”: (B, num_tfs), TF negative binomial mean = preds_tf * TF library factor.
+- “preds_rna”: (B, num_genes), predicted RNA expression.
+- “mu_nb_rna”: (B, num_genes), RNA negative binomial mean = preds_rna * RNA library factor.
+- “preds_rna_from_grn”: (B, num_genes), optional GRN-based RNA predictions.
+- “mu_nb_rna_grn”: (B, num_genes), negative binomial mean of GRN-based RNA predictions.
+- “library_factor_tf”: (B, 1), predicted library factor for TF.
+- “library_factor_rna”: (B, 1), predicted library factor for RNA.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.main">
+<dt class="sig sig-object py" id="scdori.main.run_scdori_pipeline">
+<span class="sig-prename descclassname"><span class="pre">scdori.main.</span></span><span class="sig-name descname"><span class="pre">run_scdori_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/main.html#run_scdori_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.main.run_scdori_pipeline" title="Link to this definition">#</a></dt>
+<dd><p>Run the scDoRI pipeline in three main phases:
+1) ATAC+TF warmup (phase 1 warmup),
+2) Add RNA (phase 1 full),
+3) GRN training (phase 2).</p>
+<section id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Configure logging, set random seed, determine computing device.</p></li>
+<li><p>Load data: RNA/ATAC AnnData, gene-peak distances, in silico ChIP-seq embeddings.</p></li>
+<li><p>Split cells into train and eval sets, create DataLoaders.</p></li>
+<li><p>Build and initialize the scDoRI model:
+- The model is configured with the number of genes, peaks, TFs, and topics.
+- Initialize parameters (gene-peak, in silico matrices, etc.).</p></li>
+<li><p>Train phases 1 &amp; 2 (integrated ATAC + TF, then add RNA).</p></li>
+<li><p>Save model weights.</p></li>
+<li><p>Re-initialize GRN-related parameters and run phase 3 (GRN training).</p></li>
+<li><p>Save final model weights for the GRN phase.</p></li>
+</ol>
+</section>
+<section id="id17">
+<h2>Returns<a class="headerlink" href="#id17" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>The pipeline executes end-to-end training of the scDoRI model,
+saving intermediate and final weights to disk as specified in <cite>config</cite>.</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>This function relies on configuration settings in <cite>config.py</cite>.</p></li>
+<li><p>The pipeline uses <cite>train_scdori_phases</cite> for phases 1 &amp; 2,
+and <cite>train_model_grn</cite> for the GRN phase.</p></li>
+<li><p>Outputs (model weights) are saved to the paths specified by <cite>config.weights_folder_scdori</cite>
+and <cite>config.weights_folder_grn</cite>.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.utils">
+<dt class="sig sig-object py" id="scdori.utils.log_nb_positive">
+<span class="sig-prename descclassname"><span class="pre">scdori.utils.</span></span><span class="sig-name descname"><span class="pre">log_nb_positive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_fn:</span> <span class="pre">callable</span> <span class="pre">=</span> <span class="pre">&lt;built-in</span> <span class="pre">method</span> <span class="pre">log</span> <span class="pre">of</span> <span class="pre">type</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lgamma_fn:</span> <span class="pre">callable</span> <span class="pre">=</span> <span class="pre">&lt;built-in</span> <span class="pre">method</span> <span class="pre">lgamma</span> <span class="pre">of</span> <span class="pre">type</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/utils.html#log_nb_positive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.utils.log_nb_positive" title="Link to this definition">#</a></dt>
+<dd><p>Compute the log-likelihood for a Negative Binomial (NB) distribution.</p>
+<p>This function is often used for modeling overdispersed count data in
+scRNA-seq .</p>
+<section id="id18">
+<h2>Parameters<a class="headerlink" href="#id18" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>x<span class="classifier">torch.Tensor</span></dt><dd><p>Observed count data, shape (batch_size, num_features).</p>
+</dd>
+<dt>mu<span class="classifier">torch.Tensor</span></dt><dd><p>Mean of the negative binomial, must be &gt; 0. Same shape as x.</p>
+</dd>
+<dt>theta<span class="classifier">torch.Tensor</span></dt><dd><p>Inverse-dispersion (overdispersion) parameter, must be &gt; 0. Same shape as x.</p>
+</dd>
+<dt>eps<span class="classifier">float, optional</span></dt><dd><p>A small constant for numerical stability in logarithms. Default is 1e-8.</p>
+</dd>
+<dt>log_fn<span class="classifier">callable, optional</span></dt><dd><p>A function to take the logarithm, typically <cite>torch.log</cite>. Default is <cite>torch.log</cite>.</p>
+</dd>
+<dt>lgamma_fn<span class="classifier">callable, optional</span></dt><dd><p>A function for computing log-gamma, typically <cite>torch.lgamma</cite>. Default is <cite>torch.lgamma</cite>.</p>
+</dd>
+</dl>
+</section>
+<section id="id19">
+<h2>Returns<a class="headerlink" href="#id19" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>Element-wise log-likelihood of shape (batch_size, num_features).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.utils.set_seed">
+<span class="sig-prename descclassname"><span class="pre">scdori.utils.</span></span><span class="sig-name descname"><span class="pre">set_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/utils.html#set_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.utils.set_seed" title="Link to this definition">#</a></dt>
+<dd><p>Set the random seed for Python, NumPy, and PyTorch (including CUDA if available).</p>
+<section id="id20">
+<h2>Parameters<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>seed<span class="classifier">int, optional</span></dt><dd><p>The desired random seed. Default is 200.</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h2>Returns<a class="headerlink" href="#id21" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Modifies global states of Python, NumPy, and PyTorch seeds in place.</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h2>Notes<a class="headerlink" href="#id22" title="Link to this heading">#</a></h2>
+<p>Useful for ensuring reproducible results across runs when training or testing
+the model. However, full reproducibility can still be subject to GPU hardware
+determinism settings.</p>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.train_scdori">
+<dt class="sig sig-object py" id="scdori.train_scdori.compute_eval_loss_scdori">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_scdori.</span></span><span class="sig-name descname"><span class="pre">compute_eval_loss_scdori</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_scdori.html#compute_eval_loss_scdori"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_scdori.compute_eval_loss_scdori" title="Link to this definition">#</a></dt>
+<dd><p>Compute the validation loss for scDoRI.</p>
+<section id="id23">
+<h2>Parameters<a class="headerlink" href="#id23" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model to evaluate.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch operations.</p>
+</dd>
+<dt>eval_loader<span class="classifier">torch.utils.data.DataLoader</span></dt><dd><p>A DataLoader providing validation cell indices.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>Number of cells per row (if metacells) or ones for single-cell data.</p>
+</dd>
+<dt>tf_indices<span class="classifier">list or np.ndarray</span></dt><dd><p>Indices of transcription factor genes in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding for batch information (cell x num_batches).</p>
+</dd>
+<dt>config_file<span class="classifier">object</span></dt><dd><p>Configuration object with hyperparameters (loss weights, penalties, etc.).</p>
+</dd>
+</dl>
+</section>
+<section id="id24">
+<h2>Returns<a class="headerlink" href="#id24" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple</dt><dd><p>(eval_loss, eval_loss_atac, eval_loss_tf, eval_loss_rna), each a float.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_scdori.get_loss_weights_scdori">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_scdori.</span></span><span class="sig-name descname"><span class="pre">get_loss_weights_scdori</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_scdori.html#get_loss_weights_scdori"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_scdori.get_loss_weights_scdori" title="Link to this definition">#</a></dt>
+<dd><p>Get the loss weight dictionary for the specified phase.</p>
+<section id="id25">
+<h2>Parameters<a class="headerlink" href="#id25" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>phase<span class="classifier">str</span></dt><dd><p>The phase of training, one of {“warmup_1”, “warmup_2”}.</p>
+</dd>
+<dt>config_file<span class="classifier">object</span></dt><dd><p>Configuration object containing attributes like <cite>weight_atac_phase1</cite>,
+<cite>weight_tf_phase1</cite>, <cite>weight_rna_phase1</cite>, etc.</p>
+</dd>
+</dl>
+</section>
+<section id="id26">
+<h2>Returns<a class="headerlink" href="#id26" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>dict</dt><dd><p>A dictionary with keys {“atac”, “tf”, “rna”} indicating the respective loss weights.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_scdori.get_phase_scdori">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_scdori.</span></span><span class="sig-name descname"><span class="pre">get_phase_scdori</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_scdori.html#get_phase_scdori"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_scdori.get_phase_scdori" title="Link to this definition">#</a></dt>
+<dd><p>Determine which training phase to use at a given epoch. In warmup_1, only module 1 and 3 (ATAC and TF reconstruction are trained), after which RNA construction from ATAC is added in warmup_2</p>
+<section id="id27">
+<h2>Parameters<a class="headerlink" href="#id27" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>epoch<span class="classifier">int</span></dt><dd><p>The current training epoch.</p>
+</dd>
+<dt>config_file<span class="classifier">object</span></dt><dd><p>Configuration object that includes <cite>epoch_warmup_1</cite> to define the cutoff
+for switching from phase “warmup_1” to “warmup_2”.</p>
+</dd>
+</dl>
+</section>
+<section id="id28">
+<h2>Returns<a class="headerlink" href="#id28" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>str</dt><dd><p>The phase: “warmup_1” if <cite>epoch &lt; config_file.epoch_warmup_1</cite>, else “warmup_2”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.train_scdori.train_scdori_phases">
+<span class="sig-prename descclassname"><span class="pre">scdori.train_scdori.</span></span><span class="sig-name descname"><span class="pre">train_scdori_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/train_scdori.html#train_scdori_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.train_scdori.train_scdori_phases" title="Link to this definition">#</a></dt>
+<dd><p>Train the scDoRI model in two warmup phases:
+1) Warmup Phase 1 (ATAC + TF focus).
+2) Warmup Phase 2 (adding RNA).</p>
+<p>Includes early stopping based on validation performance.</p>
+<section id="id29">
+<h2>Parameters<a class="headerlink" href="#id29" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model to be trained.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) for running PyTorch operations.</p>
+</dd>
+<dt>train_loader<span class="classifier">torch.utils.data.DataLoader</span></dt><dd><p>DataLoader for the training set, providing cell indices.</p>
+</dd>
+<dt>eval_loader<span class="classifier">torch.utils.data.DataLoader</span></dt><dd><p>DataLoader for the validation set, providing cell indices.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>Number of cells per row (metacells) or ones for single-cell data.</p>
+</dd>
+<dt>tf_indices<span class="classifier">list or np.ndarray</span></dt><dd><p>Indices of transcription factor genes in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding matrix for batch information (cells x num_batches).</p>
+</dd>
+<dt>config_file<span class="classifier">object</span></dt><dd><p>Configuration with hyperparameters including:
+- learning_rate_scdori
+- max_scdori_epochs
+- epoch_warmup_1
+- weight_atac_phase1, weight_tf_phase1, weight_rna_phase1
+- weight_atac_phase2, weight_tf_phase2, weight_rna_phase2
+- l1_penalty_topic_tf, etc.
+- eval_frequency
+- phase1_patience (early stopping patience for validation loss)</p>
+</dd>
+</dl>
+</section>
+<section id="id30">
+<h2>Returns<a class="headerlink" href="#id30" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>torch.nn.Module</dt><dd><p>The trained scDoRI model after both warmup phases.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.evaluation">
+<dt class="sig sig-object py" id="scdori.evaluation.get_latent_topics">
+<span class="sig-prename descclassname"><span class="pre">scdori.evaluation.</span></span><span class="sig-name descname"><span class="pre">get_latent_topics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/evaluation.html#get_latent_topics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.evaluation.get_latent_topics" title="Link to this definition">#</a></dt>
+<dd><p>Extract the softmaxed topic activations (theta) for each cell in the dataset.</p>
+<section id="id31">
+<h2>Parameters<a class="headerlink" href="#id31" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model containing an encoder for generating topic distributions.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The PyTorch device (e.g., ‘cpu’ or ‘cuda’) used for computations.</p>
+</dd>
+<dt>data_loader<span class="classifier">torch.utils.data.DataLoader</span></dt><dd><p>A DataLoader that yields batches of cell indices.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>RNA single-cell data in AnnData format.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC single-cell data in AnnData format.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>Number of cells in each row (e.g., if using metacells). set to ones for single-cell data.</p>
+</dd>
+<dt>tf_indices<span class="classifier">np.ndarray</span></dt><dd><p>Indices of transcription factor genes in the RNA data.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>One-hot encoding of batch information (cells x num_batches).</p>
+</dd>
+</dl>
+</section>
+<section id="id32">
+<h2>Returns<a class="headerlink" href="#id32" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A 2D NumPy array of shape (n_cells, n_topics) representing the softmaxed
+topic activations for each cell in the order given by the DataLoader.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.downstream">
+<dt class="sig sig-object py" id="scdori.downstream.compute_activator_tf_activity_per_cell">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_activator_tf_activity_per_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grn_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_all_torch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_topics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zscore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_activator_tf_activity_per_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_activator_tf_activity_per_cell" title="Link to this definition">#</a></dt>
+<dd><p>Compute per-cell activity of activator TFs.</p>
+<section id="id33">
+<h2>Parameters<a class="headerlink" href="#id33" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>grn_final<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>Activator GRN of shape (num_topics, num_tfs, num_genes).</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>List of TF names, length = num_tfs.</p>
+</dd>
+<dt>latent_all_torch<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>scDoRI latent topic activity of shape (num_cells, num_topics).</p>
+</dd>
+<dt>selected_topics<span class="classifier">list of int, optional</span></dt><dd><p>Which topics to analyze. If None, all topics are used.</p>
+</dd>
+<dt>clamp_value<span class="classifier">float, optional</span></dt><dd><p>Small constant to avoid division by zero. Default is 1e-8.</p>
+</dd>
+<dt>zscore<span class="classifier">bool, optional</span></dt><dd><p>If True, apply z-score normalization across cells in the final matrix. Default is True.</p>
+</dd>
+</dl>
+</section>
+<section id="id34">
+<h2>Returns<a class="headerlink" href="#id34" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A (num_cells, num_tfs) array of TF activity values.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_atac_grn_activator_with_significance">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_atac_grn_activator_with_significance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_atac_grn_activator_with_significance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_atac_grn_activator_with_significance" title="Link to this definition">#</a></dt>
+<dd><p>Compute significant ATAC-derived TF–gene links for activators with permutation-based significance.</p>
+<p>Uses only the learned peak-gene links and in silico ChIP-seq activator matrices.
+Significance is computed by permuting TF-binding profiles on peaks.</p>
+<section id="id35">
+<h2>Parameters<a class="headerlink" href="#id35" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The trained model containing peak and TF decoders.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) for PyTorch operations.</p>
+</dd>
+<dt>cutoff_val<span class="classifier">float</span></dt><dd><p>Significance cutoff (e.g., 0.95) for the percentile filtering.</p>
+</dd>
+<dt>outdir<span class="classifier">str</span></dt><dd><p>Directory to save the computed GRN results.</p>
+</dd>
+</dl>
+</section>
+<section id="id36">
+<h2>Returns<a class="headerlink" href="#id36" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A (num_topics, num_tfs, num_genes) array of significant ATAC-derived activator GRNs.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_atac_grn_repressor_with_significance">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_atac_grn_repressor_with_significance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_atac_grn_repressor_with_significance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_atac_grn_repressor_with_significance" title="Link to this definition">#</a></dt>
+<dd><p>Compute significant ATAC-derived TF–gene links for repressors using permutation-based significance.</p>
+<p>Uses the learned peak-gene links and in silico ChIP-seq repressor matrices.
+Significance is computed by permuting TF-binding profiles on peaks.</p>
+<section id="id37">
+<h2>Parameters<a class="headerlink" href="#id37" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The trained model containing peak and TF decoders.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) for PyTorch operations.</p>
+</dd>
+<dt>cutoff_val<span class="classifier">float</span></dt><dd><p>Significance cutoff (e.g., 0.05) for percentile filtering.</p>
+</dd>
+<dt>outdir<span class="classifier">str</span></dt><dd><p>Directory to save the computed GRN results.</p>
+</dd>
+</dl>
+</section>
+<section id="id38">
+<h2>Returns<a class="headerlink" href="#id38" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A (num_topics, num_tfs, num_genes) array of significant ATAC-derived repressor GRNs.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_neighbors_umap">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_neighbors_umap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X_scdori'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_neighbors_umap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_neighbors_umap" title="Link to this definition">#</a></dt>
+<dd><p>Compute neighbors and UMAP on the specified representation in an AnnData object.</p>
+<section id="id39">
+<h2>Parameters<a class="headerlink" href="#id39" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>An AnnData object containing single-cell RNA data.</p>
+</dd>
+<dt>rep_key<span class="classifier">str, optional</span></dt><dd><p>The key in <cite>rna_anndata.obsm</cite> that holds the latent representation used for computing UMAP.
+Default is “X_scdori”.</p>
+</dd>
+</dl>
+</section>
+<section id="id40">
+<h2>Returns<a class="headerlink" href="#id40" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Updates <cite>rna_anndata</cite> in place with neighbor graph and UMAP coordinates.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_repressor_tf_activity_per_cell">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_repressor_tf_activity_per_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grn_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_all_torch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_topics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zscore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_repressor_tf_activity_per_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_repressor_tf_activity_per_cell" title="Link to this definition">#</a></dt>
+<dd><p>Compute per-cell activity of repressor TFs.</p>
+<section id="id41">
+<h2>Parameters<a class="headerlink" href="#id41" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>grn_final<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>Repressor GRN of shape (num_topics, num_tfs, num_genes).</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>List of TF names, length = num_tfs.</p>
+</dd>
+<dt>latent_all_torch<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>scDoRI latent topic activity of shape (num_cells, num_topics).</p>
+</dd>
+<dt>selected_topics<span class="classifier">list of int, optional</span></dt><dd><p>Which topics to analyze. If None, all topics are used.</p>
+</dd>
+<dt>clamp_value<span class="classifier">float, optional</span></dt><dd><p>Small constant to avoid division by zero. Default is 1e-8.</p>
+</dd>
+<dt>zscore<span class="classifier">bool, optional</span></dt><dd><p>If True, apply z-score normalization across cells in the final matrix. Default is True.</p>
+</dd>
+</dl>
+</section>
+<section id="id42">
+<h2>Returns<a class="headerlink" href="#id42" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A (num_cells, num_tfs) array of TF activity values.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_significant_grn">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_significant_grn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_val_activator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_val_repressor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_normalised</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_significant_grn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_significant_grn" title="Link to this definition">#</a></dt>
+<dd><p>Combine Significant ATAC-derived and scDoRI-learned GRN links into final activator and repressor GRNs.</p>
+<section id="id43">
+<h2>Parameters<a class="headerlink" href="#id43" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model containing learned TF-gene topic parameters.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>CPU or CUDA device for PyTorch operations.</p>
+</dd>
+<dt>cutoff_val_activator<span class="classifier">float</span></dt><dd><p>Significance cutoff used for the activator GRN file.</p>
+</dd>
+<dt>cutoff_val_repressor<span class="classifier">float</span></dt><dd><p>Significance cutoff used for the repressor GRN file.</p>
+</dd>
+<dt>tf_normalised<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>A (num_topics x num_tfs, 1) or (num_topics x num_tfs) matrix of normalized TF usage.</p>
+</dd>
+<dt>outdir<span class="classifier">str</span></dt><dd><p>Directory containing the ATAC-based GRN files and to save computed results.</p>
+</dd>
+</dl>
+</section>
+<section id="id44">
+<h2>Returns<a class="headerlink" href="#id44" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple of np.ndarray</dt><dd><dl class="simple">
+<dt>grn_act<span class="classifier">shape (num_topics, num_tfs, num_genes)</span></dt><dd><p>Computed activator GRN array.</p>
+</dd>
+<dt>grn_rep<span class="classifier">shape (num_topics, num_tfs, num_genes)</span></dt><dd><p>Computed repressor GRN array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h2>Raises<a class="headerlink" href="#raises" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>FileNotFoundError</dt><dd><p>If the required ATAC-derived GRN files are missing.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_topic_gene_matrix">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_topic_gene_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_topic_gene_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_topic_gene_matrix" title="Link to this definition">#</a></dt>
+<dd><p>Compute a topic-gene matrix for downstream analysis (e.g., GSEA).</p>
+<section id="id45">
+<h2>Steps<a class="headerlink" href="#id45" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Apply softmax to <cite>model.topic_peak_decoder</cite> =&gt; (num_topics, num_peaks).</p></li>
+<li><p>Min-max normalize each peak across topics.</p></li>
+<li><p>Multiply by (gene_peak_factor_fixed * gene_peak_factor_learnt).</p></li>
+</ol>
+<p>4. Then apply batch norm and softmax.
+4. Get Topic Gene matrix (num_topics, num_genes)</p>
+</section>
+<section id="id46">
+<h2>Parameters<a class="headerlink" href="#id46" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model containing topic_peak_decoder and gene_peak_factor.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch operations.</p>
+</dd>
+</dl>
+</section>
+<section id="id47">
+<h2>Returns<a class="headerlink" href="#id47" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A matrix of shape (num_topics, num_genes) representing topic-gene scores.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.compute_topic_peak_umap">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">compute_topic_peak_umap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#compute_topic_peak_umap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.compute_topic_peak_umap" title="Link to this definition">#</a></dt>
+<dd><p>Compute a UMAP embedding of the topic-peak decoder matrix. Each point on this embedding is a peak.</p>
+<section id="id48">
+<h2>Steps<a class="headerlink" href="#id48" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Apply softmax to <cite>model.topic_peak_decoder</cite> =&gt; (num_topics, num_peaks).</p></li>
+<li><p>Min-max normalize across topics.</p></li>
+<li><p>Transpose to get (num_peaks, num_topics).</p></li>
+<li><p>Run UMAP on the resulting matrix to get a (num_peaks, 2) embedding.</p></li>
+</ol>
+</section>
+<section id="id49">
+<h2>Parameters<a class="headerlink" href="#id49" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The scDoRI model containing the topic_peak_decoder.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) used for PyTorch operations.</p>
+</dd>
+</dl>
+</section>
+<section id="id50">
+<h2>Returns<a class="headerlink" href="#id50" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple of (np.ndarray, np.ndarray)</dt><dd><dl class="simple">
+<dt>embedding_peaks<span class="classifier">shape (num_peaks, 2)</span></dt><dd><p>The UMAP embedding of the peaks.</p>
+</dd>
+<dt>peak_mat<span class="classifier">shape (num_peaks, num_topics)</span></dt><dd><p>The min-max normalized topic-peak matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.get_top_activators_per_topic">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">get_top_activators_per_topic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grn_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_all_torch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_topics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zscore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(25,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#get_top_activators_per_topic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.get_top_activators_per_topic" title="Link to this definition">#</a></dt>
+<dd><p>Identify and plot top activator transcription factors per topic (Topic regulators, TRs).</p>
+<section id="id51">
+<h2>Parameters<a class="headerlink" href="#id51" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>grn_final<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>An array of shape (num_topics, num_tfs, num_genes), representing an activator GRN.</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>List of TF names, length = num_tfs.</p>
+</dd>
+<dt>latent_all_torch<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>scDoRI latent topic activity of shape (num_cells, num_topics). Not always used, but can be referenced.</p>
+</dd>
+<dt>selected_topics<span class="classifier">list of int, optional</span></dt><dd><p>Which topics to analyze. If None, all topics are used.</p>
+</dd>
+<dt>top_k<span class="classifier">int, optional</span></dt><dd><p>Number of top TFs to select per topic. Default is 10.</p>
+</dd>
+<dt>clamp_value<span class="classifier">float, optional</span></dt><dd><p>Small cutoff to avoid division by zero. Default is 1e-8.</p>
+</dd>
+<dt>zscore<span class="classifier">bool, optional</span></dt><dd><p>If True, apply z-score normalization across topics in the final matrix. Default is True.</p>
+</dd>
+<dt>figsize<span class="classifier">tuple, optional</span></dt><dd><p>Size for the Seaborn clustermap. Default is (25, 10).</p>
+</dd>
+<dt>out_fig<span class="classifier">str or Path, optional</span></dt><dd><p>If provided, the figure is saved to this path; otherwise it is shown.</p>
+</dd>
+</dl>
+</section>
+<section id="id52">
+<h2>Returns<a class="headerlink" href="#id52" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple</dt><dd><dl class="simple">
+<dt>df_topic_grn<span class="classifier">pd.DataFrame</span></dt><dd><p>The final DataFrame of shape (#topics, #TF).</p>
+</dd>
+<dt>selected_tf<span class="classifier">list of str</span></dt><dd><p>A sorted list of TFs used in the final clustermap.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.get_top_repressor_per_topic">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">get_top_repressor_per_topic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grn_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_all_torch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_topics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zscore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(25,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#get_top_repressor_per_topic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.get_top_repressor_per_topic" title="Link to this definition">#</a></dt>
+<dd><p>Identify and plot top repressor transcription factors per topic.</p>
+<section id="id53">
+<h2>Parameters<a class="headerlink" href="#id53" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>grn_final<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>An array of shape (num_topics, num_tfs, num_genes), representing a repressor GRN.</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>List of TF names, length = num_tfs.</p>
+</dd>
+<dt>latent_all_torch<span class="classifier">np.ndarray or torch.Tensor</span></dt><dd><p>scDoRI latent topic activity of shape (num_cells, num_topics).</p>
+</dd>
+<dt>selected_topics<span class="classifier">list of int, optional</span></dt><dd><p>Which topics to analyze. If None, all topics are used.</p>
+</dd>
+<dt>top_k<span class="classifier">int, optional</span></dt><dd><p>Number of top TFs to select per topic. Default is 5.</p>
+</dd>
+<dt>clamp_value<span class="classifier">float, optional</span></dt><dd><p>Small cutoff to avoid division by zero. Default is 1e-8.</p>
+</dd>
+<dt>zscore<span class="classifier">bool, optional</span></dt><dd><p>If True, apply z-score normalization across topics in the final matrix. Default is True.</p>
+</dd>
+<dt>figsize<span class="classifier">tuple, optional</span></dt><dd><p>Size for the Seaborn clustermap. Default is (25, 10).</p>
+</dd>
+<dt>out_fig<span class="classifier">str or Path, optional</span></dt><dd><p>If provided, the figure is saved to this path; otherwise it is shown.</p>
+</dd>
+</dl>
+</section>
+<section id="id54">
+<h2>Returns<a class="headerlink" href="#id54" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>tuple</dt><dd><dl class="simple">
+<dt>df_plot<span class="classifier">pd.DataFrame</span></dt><dd><p>The final DataFrame of shape (#topics, #TF).</p>
+</dd>
+<dt>selected_tf<span class="classifier">list of str</span></dt><dd><p>A sorted list of TFs used in the final clustermap.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.load_best_model">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">load_best_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_model_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#load_best_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.load_best_model" title="Link to this definition">#</a></dt>
+<dd><p>Load the best model weights from disk into the given model.</p>
+<section id="id55">
+<h2>Parameters<a class="headerlink" href="#id55" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The model instance to which the weights will be loaded.</p>
+</dd>
+<dt>best_model_path<span class="classifier">str or Path</span></dt><dd><p>Path to the file containing the best model weights.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) where the model will be moved.</p>
+</dd>
+</dl>
+</section>
+<section id="id56">
+<h2>Returns<a class="headerlink" href="#id56" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>torch.nn.Module</dt><dd><p>The same model, now loaded with weights and set to eval mode.</p>
+</dd>
+</dl>
+</section>
+<section id="id57">
+<h2>Raises<a class="headerlink" href="#id57" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>FileNotFoundError</dt><dd><p>If the specified <cite>best_model_path</cite> does not exist.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.plot_topic_activation_heatmap">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">plot_topic_activation_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'celltype'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#plot_topic_activation_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.plot_topic_activation_heatmap" title="Link to this definition">#</a></dt>
+<dd><p>Compute aggregated scDoRI latent topic activation across groups, then plot a clustermap.</p>
+<section id="id58">
+<h2>Parameters<a class="headerlink" href="#id58" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>An AnnData object containing scDoRI latent factors in <cite>obsm[“X_scdori”]</cite>.</p>
+</dd>
+<dt>groupby_key<span class="classifier">str, optional</span></dt><dd><p>Column in <cite>rna_anndata.obs</cite> by which to group cells. Default is “celltype”.</p>
+</dd>
+<dt>aggregation<span class="classifier">str, optional</span></dt><dd><p>Either “median” or “mean” for aggregating factor values per group. Default is “median”.</p>
+</dd>
+</dl>
+</section>
+<section id="id59">
+<h2>Returns<a class="headerlink" href="#id59" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>The transposed aggregated DataFrame (topics x groups).</p>
+</dd>
+</dl>
+</section>
+<section id="id60">
+<h2>Notes<a class="headerlink" href="#id60" title="Link to this heading">#</a></h2>
+<p>Uses a Seaborn clustermap to visualize the aggregated data.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.save_regulons">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">save_regulons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grn_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'activator'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#save_regulons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.save_regulons" title="Link to this definition">#</a></dt>
+<dd><p>Save regulons (TF-gene links across topics) for each TF based on a given GRN matrix.</p>
+<section id="id61">
+<h2>Parameters<a class="headerlink" href="#id61" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>grn_matrix<span class="classifier">np.ndarray</span></dt><dd><p>A GRN matrix of shape (num_topics, num_tfs, num_genes).</p>
+</dd>
+<dt>tf_names<span class="classifier">list of str</span></dt><dd><p>List of transcription factor names, length = num_tfs.</p>
+</dd>
+<dt>gene_names<span class="classifier">list of str</span></dt><dd><p>List of gene names, length = num_genes.</p>
+</dd>
+<dt>num_topics<span class="classifier">int</span></dt><dd><p>Number of topics in the GRN matrix.</p>
+</dd>
+<dt>output_dir<span class="classifier">str</span></dt><dd><p>Directory where the regulon files will be saved.</p>
+</dd>
+<dt>mode<span class="classifier">str, optional</span></dt><dd><p>“activator” or “repressor”, used to name the output subdirectory/files.</p>
+</dd>
+</dl>
+</section>
+<section id="id62">
+<h2>Returns<a class="headerlink" href="#id62" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Saves individual TSV files for each TF in <cite>output_dir</cite> of shape (num_topics, num_genes), where non-zero values represent a link.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.downstream.visualize_downstream_targets">
+<span class="sig-prename descclassname"><span class="pre">scdori.downstream.</span></span><span class="sig-name descname"><span class="pre">visualize_downstream_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target_score'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/downstream.html#visualize_downstream_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.downstream.visualize_downstream_targets" title="Link to this definition">#</a></dt>
+<dd><p>Visualize the average expression of given genes on a UMAP embedding.</p>
+<p>Uses <cite>scanpy.tl.score_genes</cite> to compute a gene score, then plots using <cite>scanpy.pl.umap</cite>.</p>
+<section id="id63">
+<h2>Parameters<a class="headerlink" href="#id63" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>The AnnData object containing RNA data with <cite>.obsm[“X_umap”]</cite>.</p>
+</dd>
+<dt>gene_list<span class="classifier">list of str</span></dt><dd><p>A list of gene names to score.</p>
+</dd>
+<dt>score_name<span class="classifier">str, optional</span></dt><dd><p>Name of the resulting gene score in <cite>rna_anndata.obs</cite>. Default is “target_score”.</p>
+</dd>
+<dt>layer<span class="classifier">str, optional</span></dt><dd><p>Which layer to use if needed in <cite>score_genes</cite>. Default is “log”.</p>
+</dd>
+</dl>
+</section>
+<section id="id64">
+<h2>Returns<a class="headerlink" href="#id64" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>None</dt><dd><p>Plots the UMAP colored by the computed gene score.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.dataloader">
+<dt class="sig sig-object py" id="scdori.dataloader.create_minibatch">
+<span class="sig-prename descclassname"><span class="pre">scdori.dataloader.</span></span><span class="sig-name descname"><span class="pre">create_minibatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rna_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atac_anndata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_batch_onehot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/dataloader.html#create_minibatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.dataloader.create_minibatch" title="Link to this definition">#</a></dt>
+<dd><p>Create a minibatch of required input tensors using integer indices of cells.</p>
+<section id="id65">
+<h2>Parameters<a class="headerlink" href="#id65" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>The device (CPU or CUDA) to which the data should be moved.</p>
+</dd>
+<dt>index_matrix<span class="classifier">torch.Tensor</span></dt><dd><p>A 1D tensor containing integer indices of the cells in the minibatch.</p>
+</dd>
+<dt>rna_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>AnnData object for RNA data. The .X matrix should contain RNA counts or expression values.</p>
+</dd>
+<dt>atac_anndata<span class="classifier">anndata.AnnData</span></dt><dd><p>AnnData object for ATAC data. The .X matrix should contain accessibility counts.</p>
+</dd>
+<dt>num_cells<span class="classifier">np.ndarray</span></dt><dd><p>A NumPy array (N x 1) indicating the number of cells represented by each row (if using metacells).
+For single-cell level data, this may be an array of ones.</p>
+</dd>
+<dt>tf_indices<span class="classifier">np.ndarray</span></dt><dd><p>Indices corresponding to transcription factors (TFs) in the RNA AnnData.</p>
+</dd>
+<dt>encoding_batch_onehot<span class="classifier">np.ndarray</span></dt><dd><p>A one-hot encoded matrix representing batch information for each cell (cells x num_batches).</p>
+</dd>
+</dl>
+</section>
+<section id="id66">
+<h2>Returns<a class="headerlink" href="#id66" title="Link to this heading">#</a></h2>
+<dl>
+<dt>tuple</dt><dd><p>A tuple containing:
+- input_matrix (torch.Tensor): Concatenated RNA and ATAC input of shape (B, g + p),</p>
+<blockquote>
+<div><p>where B is batch size, g is the number of genes, p is the number of peaks. 
+Values are floats on the given device.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>tf_exp (torch.Tensor): RNA expression values for TFs, shape (B, num_tfs).</p></li>
+<li><p>library_size_value (torch.Tensor): Log-scale library sizes for RNA and ATAC, shape (B, 2).</p></li>
+<li><p>num_cells_value (torch.Tensor): Number of cells per row in the minibatch (B, 1).</p></li>
+<li><p>input_batch (torch.Tensor): One-hot batch-encoding, shape (B, num_batches).</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="id67">
+<h2>Notes<a class="headerlink" href="#id67" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>This function converts sparse arrays to dense if necessary.</p></li>
+<li><p>ATAC counts are converted from insertion counts to fragment counts by using (x + 1) // 2.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py function" id="module-scdori.data_io">
+<dt class="sig sig-object py" id="scdori.data_io.load_scdori_inputs">
+<span class="sig-prename descclassname"><span class="pre">scdori.data_io.</span></span><span class="sig-name descname"><span class="pre">load_scdori_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/data_io.html#load_scdori_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.data_io.load_scdori_inputs" title="Link to this definition">#</a></dt>
+<dd><p>Load RNA &amp; ATAC data (.h5ad files), plus gene-peak distance and in silico chip-seq matrix.</p>
+<section id="id68">
+<h2>Parameters<a class="headerlink" href="#id68" title="Link to this heading">#</a></h2>
+<dl>
+<dt>config_file<span class="classifier">object</span></dt><dd><p>A configuration file containing the attributes:
+- data_dir : pathlib.Path</p>
+<blockquote>
+<div><p>The base directory for input data.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>output_subdir<span class="classifier">str</span></dt><dd><p>The subdirectory where output files are located.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>rna_metacell_file<span class="classifier">str</span></dt><dd><p>The filename for the RNA data (single cell or metacell) (H5AD).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>atac_metacell_file<span class="classifier">str</span></dt><dd><p>The filename for the ATAC data (single cell or metacell) (H5AD).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>gene_peak_distance_file<span class="classifier">str</span></dt><dd><p>The filename for the NumPy array with gene-peak distance matrix.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>insilico_chipseq_act_file<span class="classifier">str</span></dt><dd><p>The filename for the in silico ChIP-seq activator matrix.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>insilico_chipseq_rep_file<span class="classifier">str</span></dt><dd><p>The filename for the in silico ChIP-seq repressor matrix.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="id69">
+<h2>Returns<a class="headerlink" href="#id69" title="Link to this heading">#</a></h2>
+<dl>
+<dt>tuple</dt><dd><p>A tuple containing:
+rna_metacell : anndata.AnnData</p>
+<blockquote>
+<div><p>RNA data loaded from H5AD.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>atac_metacell<span class="classifier">anndata.AnnData</span></dt><dd><p>ATAC data loaded from H5AD.</p>
+</dd>
+<dt>gene_peak_dist<span class="classifier">torch.Tensor</span></dt><dd><p>A tensor of shape (num_genes, num_peaks) representing gene-peak distances.</p>
+</dd>
+<dt>insilico_act<span class="classifier">torch.Tensor</span></dt><dd><p>A tensor of shape (num_peaks, num_motifs) for in silico ChIP-seq (activator) embeddings.</p>
+</dd>
+<dt>insilico_rep<span class="classifier">torch.Tensor</span></dt><dd><p>A tensor of shape (num_peaks, num_motifs) for in silico ChIP-seq (repressor) embeddings.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scdori.data_io.save_model_weights">
+<span class="sig-prename descclassname"><span class="pre">scdori.data_io.</span></span><span class="sig-name descname"><span class="pre">save_model_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scdori/data_io.html#save_model_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scdori.data_io.save_model_weights" title="Link to this definition">#</a></dt>
+<dd><p>Save model weights to a specified path with a given tag.</p>
+<section id="id70">
+<h2>Parameters<a class="headerlink" href="#id70" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">torch.nn.Module</span></dt><dd><p>The PyTorch model whose state_dict is to be saved.</p>
+</dd>
+<dt>path<span class="classifier">pathlib.Path</span></dt><dd><p>The directory path where the weights file will be saved.</p>
+</dd>
+<dt>tag<span class="classifier">str</span></dt><dd><p>An identifier to include in the saved filename (e.g., “best_eval”).</p>
+</dd>
+</dl>
+</section>
+<section id="id71">
+<h2>Returns<a class="headerlink" href="#id71" title="Link to this heading">#</a></h2>
+<p>None</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="preprocessing_pipeline.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Preprocessing Pipeline</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.compute_eval_loss_grn"><code class="docutils literal notranslate"><span class="pre">compute_eval_loss_grn()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.get_tf_expression"><code class="docutils literal notranslate"><span class="pre">get_tf_expression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.set_encoder_frozen"><code class="docutils literal notranslate"><span class="pre">set_encoder_frozen()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.set_peak_gene_frozen"><code class="docutils literal notranslate"><span class="pre">set_peak_gene_frozen()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.set_topic_peak_frozen"><code class="docutils literal notranslate"><span class="pre">set_topic_peak_frozen()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.set_topic_tf_frozen"><code class="docutils literal notranslate"><span class="pre">set_topic_tf_frozen()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_grn.train_model_grn"><code class="docutils literal notranslate"><span class="pre">train_model_grn()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.models.initialize_scdori_parameters"><code class="docutils literal notranslate"><span class="pre">initialize_scdori_parameters()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.models.scDoRI"><code class="docutils literal notranslate"><span class="pre">scDoRI</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.models.scDoRI.encode"><code class="docutils literal notranslate"><span class="pre">scDoRI.encode()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.models.scDoRI.forward"><code class="docutils literal notranslate"><span class="pre">scDoRI.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.main.run_scdori_pipeline"><code class="docutils literal notranslate"><span class="pre">run_scdori_pipeline()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.utils.log_nb_positive"><code class="docutils literal notranslate"><span class="pre">log_nb_positive()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.utils.set_seed"><code class="docutils literal notranslate"><span class="pre">set_seed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_scdori.compute_eval_loss_scdori"><code class="docutils literal notranslate"><span class="pre">compute_eval_loss_scdori()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_scdori.get_loss_weights_scdori"><code class="docutils literal notranslate"><span class="pre">get_loss_weights_scdori()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_scdori.get_phase_scdori"><code class="docutils literal notranslate"><span class="pre">get_phase_scdori()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.train_scdori.train_scdori_phases"><code class="docutils literal notranslate"><span class="pre">train_scdori_phases()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.evaluation.get_latent_topics"><code class="docutils literal notranslate"><span class="pre">get_latent_topics()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_activator_tf_activity_per_cell"><code class="docutils literal notranslate"><span class="pre">compute_activator_tf_activity_per_cell()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_atac_grn_activator_with_significance"><code class="docutils literal notranslate"><span class="pre">compute_atac_grn_activator_with_significance()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_atac_grn_repressor_with_significance"><code class="docutils literal notranslate"><span class="pre">compute_atac_grn_repressor_with_significance()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_neighbors_umap"><code class="docutils literal notranslate"><span class="pre">compute_neighbors_umap()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_repressor_tf_activity_per_cell"><code class="docutils literal notranslate"><span class="pre">compute_repressor_tf_activity_per_cell()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_significant_grn"><code class="docutils literal notranslate"><span class="pre">compute_significant_grn()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_topic_gene_matrix"><code class="docutils literal notranslate"><span class="pre">compute_topic_gene_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.compute_topic_peak_umap"><code class="docutils literal notranslate"><span class="pre">compute_topic_peak_umap()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.get_top_activators_per_topic"><code class="docutils literal notranslate"><span class="pre">get_top_activators_per_topic()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.get_top_repressor_per_topic"><code class="docutils literal notranslate"><span class="pre">get_top_repressor_per_topic()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.load_best_model"><code class="docutils literal notranslate"><span class="pre">load_best_model()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.plot_topic_activation_heatmap"><code class="docutils literal notranslate"><span class="pre">plot_topic_activation_heatmap()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.save_regulons"><code class="docutils literal notranslate"><span class="pre">save_regulons()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.downstream.visualize_downstream_targets"><code class="docutils literal notranslate"><span class="pre">visualize_downstream_targets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.dataloader.create_minibatch"><code class="docutils literal notranslate"><span class="pre">create_minibatch()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.data_io.load_scdori_inputs"><code class="docutils literal notranslate"><span class="pre">load_scdori_inputs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scdori.data_io.save_model_weights"><code class="docutils literal notranslate"><span class="pre">save_model_weights()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/scdori.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Manu Saraswat.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
