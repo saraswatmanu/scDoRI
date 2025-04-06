@@ -10,7 +10,7 @@
 - **Continuous eGRN modelling** : each cell is a mixture of topics, allowing study of changes in GRNs. No need for predefined clusters  
 - **Scalable**: mini-batch training for millions of cells
   
-## 📦 Installation and Usage
+## 📦 Installation 
 
 
 ### 1) Clone this repo
@@ -24,11 +24,13 @@ cd scDoRI
 conda env create -f environment.yml
 conda activate scdori-env
 ```
-### 3) Edit config files
+
+## Usage
+### 1) Edit config files
 #### First edit preprocessing_pipeline/config.py 
 to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on. - scdori/config.py for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
 #### Second edit scdori/config.py
 for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
 
-### 4) Run Notebooks
+### 2) Run Notebooks
 first run notebooks/preprocessing.ipynb, then notebooks/training.ipynb
