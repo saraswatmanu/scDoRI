@@ -29,8 +29,7 @@ You’ll work through two notebooks, using two separate config files to set para
 ```bash
 preprocessing_pipeline/config.py
 ```
-to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on. - scdori/config.py for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
-
+to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on. 
 #### Run preprocessing notebook
 ```bash
 notebooks/preprocessing.ipynb
