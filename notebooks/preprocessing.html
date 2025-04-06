@@ -1,0 +1,1143 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Preprocessing Notebook &#8212; scDoRI  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/preprocessing';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">scDoRI  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Preprocessing Notebook</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Preprocessing-Notebook">
+<h1>Preprocessing Notebook<a class="headerlink" href="#Preprocessing-Notebook" title="Link to this heading">#</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># 1) Import config &amp; internal modules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.download</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">download_genome_references</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.data_io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_dir_if_not_exists</span><span class="p">,</span>
+    <span class="n">load_anndata</span><span class="p">,</span>
+    <span class="n">save_processed_datasets</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.filtering</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">intersect_cells</span><span class="p">,</span>
+    <span class="n">remove_mitochondrial_genes</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.gene_selection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">load_gtf</span><span class="p">,</span>
+    <span class="n">filter_protein_coding_genes</span><span class="p">,</span>
+    <span class="n">compute_hvgs_and_tfs</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.peak_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">keep_promoters_and_select_hv_peaks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.metacells</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_metacells</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.motif_scanning</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">run_bedtools_intersect</span><span class="p">,</span>
+    <span class="n">load_motif_database</span><span class="p">,</span>
+    <span class="n">compute_motif_scores</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.correlation</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_in_silico_chipseq</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">preprocessing_pipeline.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_extended_gene_bed</span><span class="p">,</span><span class="n">compute_gene_peak_distance_matrix</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">reload</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">for</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">module_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;preprocessing_pipeline&quot;</span><span class="p">):</span>
+        <span class="n">reload</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">logging_level</span><span class="p">)</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Starting multi-ome preprocessing pipeline ===&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:__main__:=== Starting multi-ome preprocessing pipeline ===
+</pre></div></div>
+</div>
+<section id="1.-Prepare-directories">
+<h2>1. Prepare directories<a class="headerlink" href="#1.-Prepare-directories" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+<span class="n">genome_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">genome_dir</span><span class="p">)</span>
+<span class="n">motif_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">motif_directory</span><span class="p">)</span>
+<span class="n">out_dir</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">/</span> <span class="n">config</span><span class="o">.</span><span class="n">output_subdir_name</span>
+
+<span class="n">create_dir_if_not_exists</span><span class="p">(</span><span class="n">genome_dir</span><span class="p">)</span>
+<span class="n">create_dir_if_not_exists</span><span class="p">(</span><span class="n">motif_dir</span><span class="p">)</span>
+<span class="n">create_dir_if_not_exists</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.-Download-reference-genome,-gene-annotations-and-chromosome-sizes">
+<h2>2. Download reference genome, gene annotations and chromosome sizes<a class="headerlink" href="#2.-Download-reference-genome,-gene-annotations-and-chromosome-sizes" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">download_genome_references</span><span class="p">(</span>
+    <span class="n">genome_dir</span><span class="o">=</span><span class="n">genome_dir</span><span class="p">,</span>
+    <span class="n">species</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">species</span><span class="p">,</span>
+    <span class="n">assembly</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">genome_assembly</span><span class="p">,</span>
+    <span class="n">gtf_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gtf_url</span><span class="p">,</span>
+    <span class="n">chrom_sizes_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">chrom_sizes_url</span><span class="p">,</span>
+    <span class="n">fasta_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">fasta_url</span>
+<span class="p">)</span>
+<span class="c1">#download_motif_database(motif_dir, config.motif_database, config.species)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.download:Using genome references for species=&#39;mouse&#39;, assembly=&#39;mm10&#39;.
+GTF: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/gencode.vM18.basic.annotation.gtf.gz
+Chrom.sizes: https://hgdownload.cse.ucsc.edu/goldenpath/mm10/bigZips/mm10.chrom.sizes
+FASTA: https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.fa.gz
+INFO:preprocessing_pipeline.download:Reference files are ready in /data/saraswat/new_metacells/mouse_genome_files
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Load-RNA-and-ATAC-anndata">
+<h2>3. Load RNA and ATAC anndata<a class="headerlink" href="#3.-Load-RNA-and-ATAC-anndata" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">data_rna</span><span class="p">,</span> <span class="n">data_atac</span> <span class="o">=</span> <span class="n">load_anndata</span><span class="p">(</span>
+    <span class="n">data_dir</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">rna_adata_file_name</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">atac_adata_file_name</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.data_io:Loading RNA from /data/saraswat/new_metacells/data_gastrulation_single_cell/anndata.h5ad, ATAC from /data/saraswat/new_metacells/data_gastrulation_single_cell/PeakMatrix_anndata.h5ad
+</pre></div></div>
+</div>
+</section>
+<section id="4.-Find-cells-common-to-both-modalities-and-remove-mito-genes">
+<h2>4. Find cells common to both modalities and remove mito genes<a class="headerlink" href="#4.-Find-cells-common-to-both-modalities-and-remove-mito-genes" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">data_rna</span><span class="p">,</span> <span class="n">data_atac</span> <span class="o">=</span> <span class="n">intersect_cells</span><span class="p">(</span><span class="n">data_rna</span><span class="p">,</span> <span class="n">data_atac</span><span class="p">)</span>
+<span class="n">data_rna</span> <span class="o">=</span> <span class="n">remove_mitochondrial_genes</span><span class="p">(</span><span class="n">data_rna</span><span class="p">,</span> <span class="n">mito_prefix</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">mitochondrial_prefix</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.filtering:Intersected cells: now RNA=(56861, 32285), ATAC=(56861, 192251)
+INFO:preprocessing_pipeline.filtering:Removed 13 mitochondrial genes with prefix=mt-
+</pre></div></div>
+</div>
+</section>
+<section id="5.-Optionally-filter-anndata-to-protein-coding-genes">
+<h2>5. Optionally filter anndata to protein-coding genes<a class="headerlink" href="#5.-Optionally-filter-anndata-to-protein-coding-genes" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">gtf_file</span> <span class="o">=</span> <span class="n">genome_dir</span> <span class="o">/</span> <span class="s2">&quot;annotation.gtf&quot;</span>
+<span class="n">gtf_df</span> <span class="o">=</span> <span class="n">load_gtf</span><span class="p">(</span><span class="n">gtf_file</span><span class="p">)</span>
+<span class="n">data_rna</span> <span class="o">=</span> <span class="n">filter_protein_coding_genes</span><span class="p">(</span><span class="n">data_rna</span><span class="p">,</span> <span class="n">gtf_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.gene_selection:Loading GTF from /data/saraswat/new_metacells/mouse_genome_files/annotation.gtf
+INFO:root:Extracted GTF attributes: [&#39;gene_id&#39;, &#39;gene_type&#39;, &#39;gene_name&#39;, &#39;level&#39;, &#39;havana_gene&#39;, &#39;transcript_id&#39;, &#39;transcript_type&#39;, &#39;transcript_name&#39;, &#39;transcript_support_level&#39;, &#39;tag&#39;, &#39;havana_transcript&#39;, &#39;exon_number&#39;, &#39;exon_id&#39;, &#39;protein_id&#39;, &#39;ccdsid&#39;, &#39;ont&#39;]
+INFO:preprocessing_pipeline.gene_selection:Filtered to protein-coding genes: 19374 genes left.
+</pre></div></div>
+</div>
+</section>
+<section id="6.-Selecting-highly-variable-genes-and-TFs">
+<h2>6. Selecting highly variable genes and TFs<a class="headerlink" href="#6.-Selecting-highly-variable-genes-and-TFs" title="Link to this heading">#</a></h2>
+<p>First we find which TFs have a motif present in the database provided. User provided sets of genes and TFs are included in final list by default; highly variable computations are performed to obtain remaining genes and TFs</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">motif_path</span> <span class="o">=</span> <span class="n">motif_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">motif_database</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">.meme&quot;</span>
+<span class="n">tf_names_all</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">motif_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;MOTIF&quot;</span><span class="p">):</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">tf_name</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;()&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">tf_names_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tf_name</span><span class="p">)</span>
+<span class="n">tf_names_all</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tf_names_all</span><span class="p">)))</span>
+
+<span class="n">data_rna</span><span class="p">,</span> <span class="n">final_genes</span><span class="p">,</span> <span class="n">final_tfs</span> <span class="o">=</span> <span class="n">compute_hvgs_and_tfs</span><span class="p">(</span>
+    <span class="n">data_rna</span><span class="o">=</span><span class="n">data_rna</span><span class="p">,</span>
+    <span class="n">tf_names</span><span class="o">=</span><span class="n">tf_names_all</span><span class="p">,</span>
+    <span class="n">user_genes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">genes_user</span><span class="p">,</span>
+    <span class="n">user_tfs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tfs_user</span><span class="p">,</span>
+    <span class="n">num_genes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_genes</span><span class="p">,</span>
+    <span class="n">num_tfs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_tfs</span><span class="p">,</span>
+    <span class="n">min_cells</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">min_cells_per_gene</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.gene_selection:Selecting HVGs and TFs...
+INFO:preprocessing_pipeline.gene_selection:Selected 3700 HVGs + 300 TFs.
+</pre></div></div>
+</div>
+</section>
+<section id="7.-Create-extended-gene-bed-file">
+<h2>7. Create extended gene bed file<a class="headerlink" href="#7.-Create-extended-gene-bed-file" title="Link to this heading">#</a></h2>
+<p>Here we extend the gene body to the user defined genomic window for processing later</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">chrom_sizes_path</span> <span class="o">=</span> <span class="n">genome_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">genome_assembly</span><span class="si">}</span><span class="s2">.chrom.sizes&quot;</span>
+<span class="n">extended_genes_bed_df</span> <span class="o">=</span> <span class="n">create_extended_gene_bed</span><span class="p">(</span>
+    <span class="n">gtf_df</span><span class="p">,</span>
+    <span class="n">final_genes</span> <span class="o">+</span> <span class="n">final_tfs</span><span class="p">,</span>  <span class="c1"># if we want to include TF genes too</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">window_size</span><span class="p">,</span>
+    <span class="n">chrom_sizes_path</span><span class="o">=</span><span class="n">chrom_sizes_path</span>
+<span class="p">)</span>
+
+<span class="n">gene_bed_file</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;genes_extended_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">window_size</span><span class="o">//</span><span class="mi">1000</span><span class="si">}</span><span class="s2">kb.bed&quot;</span>
+<span class="n">extended_genes_bed_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">gene_bed_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created extended gene bed =&gt; </span><span class="si">{</span><span class="n">gene_bed_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:__main__:Created extended gene bed =&gt; /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/genes_extended_80kb.bed
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>idx</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>chr1:3035602-3036202</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>chr1:3062653-3063253</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>chr1:3072313-3072913</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>chr1:3191496-3192096</th>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>chr1:3340575-3341175</th>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>chrX:169902806-169903406</th>
+      <td>3284</td>
+    </tr>
+    <tr>
+      <th>chrX:169905921-169906521</th>
+      <td>3285</td>
+    </tr>
+    <tr>
+      <th>chrX:169915616-169916216</th>
+      <td>3286</td>
+    </tr>
+    <tr>
+      <th>chrX:169925487-169926087</th>
+      <td>3287</td>
+    </tr>
+    <tr>
+      <th>chrX:169937064-169937664</th>
+      <td>3288</td>
+    </tr>
+  </tbody>
+</table>
+<p>192251 rows × 1 columns</p>
+</div></div>
+</div>
+</section>
+<section id="8.-Create-bed-file-for-all-peaks">
+<h2>8. Create bed file for all peaks<a class="headerlink" href="#8.-Create-bed-file-for-all-peaks" title="Link to this heading">#</a></h2>
+<p>Of note, that peak anndata var should have chr, start, end and peak_name columns. If not, obtain them</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span>
+<span class="n">all_peaks_bed</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;peaks_all.bed&quot;</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;start&quot;</span><span class="p">,</span><span class="s2">&quot;end&quot;</span><span class="p">,</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">all_peaks_bed</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="9.-intersect-peaks-with-extended-gene-window">
+<h2>9. intersect peaks with extended gene window<a class="headerlink" href="#9.-intersect-peaks-with-extended-gene-window" title="Link to this heading">#</a></h2>
+<p>Here we subset to peaks which are within a user-defined genomic window of atleast one (selected) gene.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">intersected_bed</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;peaks_intersected.bed&quot;</span>
+<span class="n">run_bedtools_intersect</span><span class="p">(</span><span class="n">a_bed</span><span class="o">=</span><span class="n">all_peaks_bed</span><span class="p">,</span> <span class="n">b_bed</span><span class="o">=</span><span class="n">gene_bed_file</span><span class="p">,</span> <span class="n">out_bed</span><span class="o">=</span><span class="n">intersected_bed</span><span class="p">)</span>
+
+<span class="n">peaks_intersected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">intersected_bed</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">peaks_intersected</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;start&quot;</span><span class="p">,</span><span class="s2">&quot;end&quot;</span><span class="p">,</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]</span>
+<span class="n">windowed_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">peaks_intersected</span><span class="p">[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">])</span>
+
+<span class="c1"># Subset data_atac to these peaks</span>
+<span class="n">data_atac</span> <span class="o">=</span> <span class="n">data_atac</span><span class="p">[:,</span> <span class="nb">list</span><span class="p">(</span><span class="n">windowed_set</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;After gene-window filtering =&gt; shape=</span><span class="si">{</span><span class="n">data_atac</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.motif_scanning:Running: bedtools intersect -u -wa -a /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/peaks_all.bed -b /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/genes_extended_80kb.bed &gt; /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/peaks_intersected.bed
+INFO:__main__:After gene-window filtering =&gt; shape=(56861, 98566)
+</pre></div></div>
+</div>
+</section>
+<section id="10.-Create-metacells-and-store-in-.obs[%22leiden%22]">
+<h2>10. Create metacells and store in .obs[“leiden”]<a class="headerlink" href="#10.-Create-metacells-and-store-in-.obs[%22leiden%22]" title="Link to this heading">#</a></h2>
+<p>Here we obtain metacells using fine-grained leiden clustering on RNA modality. These metacells ar eused to calculate highly variable peaks and to calculate insilico-chipseq scores.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">rna_metacell</span><span class="p">,</span> <span class="n">atac_metacell</span> <span class="o">=</span> <span class="n">create_metacells</span><span class="p">(</span>
+    <span class="n">data_rna</span><span class="p">,</span> <span class="n">data_atac</span><span class="p">,</span>
+    <span class="n">grouping_key</span><span class="o">=</span><span class="s2">&quot;leiden&quot;</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">leiden_resolution</span><span class="p">,</span>
+    <span class="n">batch_key</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">batch_key</span>
+<span class="p">)</span>
+ <span class="c1"># Copy labels</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_rna</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.metacells:Creating metacells with resolution=10 (grouping key=leiden).
+2025-03-14 20:19:19,432 - harmonypy - INFO - Computing initial centroids with sklearn.KMeans...
+INFO:harmonypy:Computing initial centroids with sklearn.KMeans...
+2025-03-14 20:19:20,834 - harmonypy - INFO - sklearn.KMeans initialization complete.
+INFO:harmonypy:sklearn.KMeans initialization complete.
+2025-03-14 20:19:21,003 - harmonypy - INFO - Iteration 1 of 10
+INFO:harmonypy:Iteration 1 of 10
+2025-03-14 20:19:27,921 - harmonypy - INFO - Iteration 2 of 10
+INFO:harmonypy:Iteration 2 of 10
+2025-03-14 20:19:34,804 - harmonypy - INFO - Iteration 3 of 10
+INFO:harmonypy:Iteration 3 of 10
+2025-03-14 20:19:41,695 - harmonypy - INFO - Iteration 4 of 10
+INFO:harmonypy:Iteration 4 of 10
+2025-03-14 20:19:48,586 - harmonypy - INFO - Iteration 5 of 10
+INFO:harmonypy:Iteration 5 of 10
+2025-03-14 20:19:55,489 - harmonypy - INFO - Iteration 6 of 10
+INFO:harmonypy:Iteration 6 of 10
+2025-03-14 20:20:02,383 - harmonypy - INFO - Iteration 7 of 10
+INFO:harmonypy:Iteration 7 of 10
+2025-03-14 20:20:09,297 - harmonypy - INFO - Converged after 7 iterations
+INFO:harmonypy:Converged after 7 iterations
+/data/saraswat/new_metacells/scdori_pip/preprocessing_pipeline/metacells.py:50: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+
+ To achieve the future defaults please pass: flavor=&#34;igraph&#34; and n_iterations=2.  directed must also be False to work with igraph&#39;s implementation.
+  sc.tl.leiden(data_rna, resolution=resolution, key_added=grouping_key)
+/data/saraswat/new_metacells/scdori_pip/preprocessing_pipeline/metacells.py:54: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  cluster_groups = data_rna.obs.groupby(grouping_key)
+INFO:preprocessing_pipeline.metacells:Metacell shapes: RNA=(140, 4000), ATAC=(140, 98566)
+</pre></div></div>
+</div>
+</section>
+<section id="11.-Keep-promoter-peaks-and-highly-variable-peaks-from-the-rest-=&gt;-total-#-=-num_peaks">
+<h2>11. Keep promoter peaks and highly variable peaks from the rest =&gt; total # = num_peaks<a class="headerlink" href="#11.-Keep-promoter-peaks-and-highly-variable-peaks-from-the-rest-=>-total-#-=-num_peaks" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">data_atac</span> <span class="o">=</span> <span class="n">keep_promoters_and_select_hv_peaks</span><span class="p">(</span>
+    <span class="n">data_atac</span><span class="o">=</span><span class="n">data_atac</span><span class="p">,</span>
+    <span class="n">total_n_peaks</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_peaks</span><span class="p">,</span>
+    <span class="n">cluster_key</span><span class="o">=</span><span class="s2">&quot;leiden&quot;</span><span class="p">,</span>
+    <span class="n">promoter_col</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">promoter_col</span>  <span class="c1"># column in data_atac.var</span>
+<span class="p">)</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final shape after combining promoters + HV =&gt; </span><span class="si">{</span><span class="n">data_atac</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:preprocessing_pipeline.peak_selection:Column promoter_col not found in data_atac.var; no special promoter logic.
+/data/saraswat/new_metacells/scdori_pip/preprocessing_pipeline/peak_selection.py:22: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  cluster_groups = data_atac.obs.groupby(cluster_key)
+INFO:preprocessing_pipeline.peak_selection:Selected top 90000 variable peaks (by std across leiden).
+INFO:__main__:Final shape after combining promoters + HV =&gt; (56861, 90000)
+</pre></div></div>
+</div>
+</section>
+<section id="12.-Save-processed-ATAC-and-RNA-data">
+<h2>12. Save processed ATAC and RNA data<a class="headerlink" href="#12.-Save-processed-ATAC-and-RNA-data" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">save_processed_datasets</span><span class="p">(</span><span class="n">data_rna</span><span class="p">,</span> <span class="n">data_atac</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+... storing &#39;gene_type&#39; as categorical
+... storing &#39;chr&#39; as categorical
+INFO:preprocessing_pipeline.data_io:Saved processed RNA to /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/rna_processed.h5ad with shape=(56861, 4000)
+INFO:preprocessing_pipeline.data_io:Saved processed ATAC to /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/atac_processed.h5ad with shape=(56861, 90000)
+</pre></div></div>
+</div>
+</section>
+<section id="13.-Make-bed-file-for-final-set-of-peaks-(post-selection)">
+<h2>13. Make bed file for final set of peaks (post selection)<a class="headerlink" href="#13.-Make-bed-file-for-final-set-of-peaks-(post-selection)" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><br/><span></span><span class="c1">#</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var_names</span>
+<span class="n">peaks_bed</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;peaks_selected.bed&quot;</span>
+<span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;start&quot;</span><span class="p">,</span><span class="s2">&quot;end&quot;</span><span class="p">,</span><span class="s2">&quot;peak_name&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+    <span class="n">peaks_bed</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="14.-Compute-motif-matches-for-peaks">
+<h2>14. Compute motif matches for peaks<a class="headerlink" href="#14.-Compute-motif-matches-for-peaks" title="Link to this heading">#</a></h2>
+<p>We use FIMO module from tangermeme (<a class="reference external" href="https://tangermeme.readthedocs.io/en/latest/tutorials/Tutorial_D1_FIMO.html">https://tangermeme.readthedocs.io/en/latest/tutorials/Tutorial_D1_FIMO.html</a>) to score the motifs</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">motif_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">motif_directory</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">motif_database</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">.meme&quot;</span>
+<span class="n">pwms_sub</span><span class="p">,</span> <span class="n">key_to_tf</span> <span class="o">=</span> <span class="n">load_motif_database</span><span class="p">(</span><span class="n">motif_path</span><span class="p">,</span> <span class="n">final_tfs</span><span class="p">)</span>
+<span class="n">fasta_path</span> <span class="o">=</span> <span class="n">genome_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">genome_assembly</span><span class="si">}</span><span class="s2">.fa&quot;</span>
+<span class="n">df_motif_scores</span> <span class="o">=</span> <span class="n">compute_motif_scores</span><span class="p">(</span>
+    <span class="n">bed_file</span><span class="o">=</span><span class="n">peaks_bed</span><span class="p">,</span>
+    <span class="n">fasta_file</span><span class="o">=</span><span class="n">fasta_path</span><span class="p">,</span>
+    <span class="n">pwms_sub</span><span class="o">=</span><span class="n">pwms_sub</span><span class="p">,</span>
+    <span class="n">key_to_tf</span><span class="o">=</span><span class="n">key_to_tf</span><span class="p">,</span>
+    <span class="n">n_peaks</span><span class="o">=</span><span class="n">data_atac</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">window</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">motif_match_pvalue_threshold</span>
+<span class="p">)</span>
+<span class="n">df_motif_scores</span><span class="o">=</span><span class="n">df_motif_scores</span><span class="p">[</span><span class="n">final_tfs</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.motif_scanning:Reading motif file: /data/saraswat/new_metacells/motif_database/cisbp_mouse.meme
+INFO:preprocessing_pipeline.motif_scanning:Subselected 300 motifs for 300 TFs.
+INFO:preprocessing_pipeline.motif_scanning:Computing motif scores for /data/saraswat/new_metacells/data_gastrulation_single_cell/generated/peaks_selected.bed (n_peaks=90000) with window=500
+100%|██████████| 300/300 [00:05&lt;00:00, 57.26it/s]
+INFO:preprocessing_pipeline.motif_scanning:Finished computing motif scores: (90000, 300)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_motif_scores</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;motif_scores.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="15.-compute-insilico-chipseq">
+<h2>15. compute insilico-chipseq<a class="headerlink" href="#15.-compute-insilico-chipseq" title="Link to this heading">#</a></h2>
+<p>We first subset the previously computed ATAC metacell matrix to selected peaks and use it calculate correlation of TF-peak expression-accesibility. These correlations are thresholded based on an empirically determined cutoff ( from non-motif matched peaks per TF) and then multiplied by motif matching scores from FIMO to obtain insilico-chipseq scores ( adapted from <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2022.06.15.496239v1">https://www.biorxiv.org/content/10.1101/2022.06.15.496239v1</a> and DiFFTF <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/31801079/">https://pubmed.ncbi.nlm.nih.gov/31801079/</a>)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 14) Recompute metacells for correlation with selected peaks</span>
+    <span class="c1">#     Or subset existing atac_metacell to the new set of peaks</span>
+<span class="c1"># then compute insilico-chipseq</span>
+<span class="n">atac_metacell</span> <span class="o">=</span> <span class="n">atac_metacell</span><span class="p">[:,</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">tf_mask</span> <span class="o">=</span> <span class="n">rna_metacell</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;gene_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TF&quot;</span>
+<span class="n">rna_matrix</span> <span class="o">=</span> <span class="n">rna_metacell</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="n">tf_mask</span><span class="p">]</span>  <span class="c1"># shape=(n_meta, n_tfs)</span>
+<span class="n">atac_matrix</span> <span class="o">=</span> <span class="n">atac_metacell</span><span class="o">.</span><span class="n">X</span>  <span class="c1"># shape=(n_meta, n_peaks)</span>
+
+<span class="n">insilico_chipseq_act</span><span class="p">,</span> <span class="n">insilico_chipseq_rep</span> <span class="o">=</span> <span class="n">compute_in_silico_chipseq</span><span class="p">(</span>
+    <span class="n">atac_matrix</span><span class="o">=</span><span class="n">atac_matrix</span><span class="p">,</span>
+    <span class="n">rna_matrix</span><span class="o">=</span><span class="n">rna_matrix</span><span class="p">,</span>
+    <span class="n">motif_scores</span><span class="o">=</span><span class="n">df_motif_scores</span><span class="p">,</span>
+    <span class="n">percentile</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">correlation_percentile</span><span class="p">,</span>
+    <span class="n">n_bg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">n_bg_peaks_for_corr</span>
+<span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;insilico_chipseq_act.npy&quot;</span><span class="p">,</span> <span class="n">insilico_chipseq_act</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;insilico_chipseq_rep.npy&quot;</span><span class="p">,</span> <span class="n">insilico_chipseq_rep</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.correlation:Computing in-silico ChIP-seq correlation...
+Thresholding correlation: 100%|██████████| 300/300 [00:01&lt;00:00, 217.98it/s]
+INFO:preprocessing_pipeline.correlation:Finished in-silico ChIP-seq computation.
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### 16. Compute distance matrix between peaks and genes</span>
+
+<span class="n">distance</span> <span class="ow">is</span> <span class="nb">set</span> <span class="n">to</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">the</span> <span class="n">peak</span> <span class="n">midpoint</span> <span class="ow">is</span> <span class="n">within</span> <span class="n">gene</span><span class="o">-</span><span class="n">body</span> <span class="ow">or</span> <span class="n">promoter</span> <span class="p">(</span><span class="mi">5</span><span class="n">kb</span> <span class="n">upstream</span> <span class="n">of</span> <span class="n">TSS</span> <span class="n">by</span> <span class="n">default</span><span class="p">)</span>
+<span class="n">distance</span> <span class="ow">is</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">peak</span><span class="o">-</span><span class="n">gene</span> <span class="n">pairs</span> <span class="n">on</span> <span class="n">different</span> <span class="n">chromosomes</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;index_int&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_atac</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">selected_peak_indices</span> <span class="o">=</span> <span class="n">data_atac</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;index_int&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+<span class="c1"># Subset GTF to final genes</span>
+<span class="n">gene_info</span> <span class="o">=</span> <span class="n">gtf_df</span><span class="p">[</span><span class="n">gtf_df</span><span class="o">.</span><span class="n">feature</span> <span class="o">==</span> <span class="s2">&quot;gene&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s2">&quot;gene_name&quot;</span><span class="p">)</span>
+<span class="n">gene_info</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">gene_info</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">gene_info</span> <span class="o">=</span> <span class="n">gene_info</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;gene_name&quot;</span><span class="p">)</span>
+<span class="n">gene_info</span> <span class="o">=</span> <span class="n">gene_info</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_rna</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">gene_info</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="p">]</span>
+
+
+<span class="n">gene_info</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gene_info</span><span class="p">[</span><span class="s2">&quot;seqname&quot;</span><span class="p">]</span>  <span class="c1"># rename col for consistency</span>
+<span class="c1"># Create gene_coordinates_intersect with necessary columns</span>
+<span class="n">gene_info</span> <span class="o">=</span> <span class="n">gene_info</span><span class="p">[[</span>
+    <span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;strand&quot;</span><span class="p">,</span><span class="s2">&quot;gene&quot;</span>
+<span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">gene_info</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chr_gene&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;strand&quot;</span><span class="p">,</span><span class="s2">&quot;gene&quot;</span><span class="p">]</span>
+
+<span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">compute_gene_peak_distance_matrix</span><span class="p">(</span>
+    <span class="n">data_rna</span><span class="o">=</span><span class="n">data_rna</span><span class="p">,</span>
+    <span class="n">data_atac</span><span class="o">=</span><span class="n">data_atac</span><span class="p">,</span>
+    <span class="n">gene_coordinates_intersect</span><span class="o">=</span><span class="n">gene_info</span>
+
+<span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;gene_peak_distance_raw.npy&quot;</span><span class="p">,</span> <span class="n">dist_matrix</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:preprocessing_pipeline.utils:Starting computation of gene-peak distances...
+INFO:preprocessing_pipeline.utils:Number of genes: 4000, Number of peaks: 90000
+100%|██████████| 4000/4000 [05:07&lt;00:00, 13.00it/s]
+INFO:preprocessing_pipeline.utils:Gene-peak distance matrix computed with shape: (4000, 90000)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_matrix</span> <span class="c1"># -1 denotes peaks on different chromosome</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[-1, 19948529, -1, ..., -1, -1, -1],
+       [-1, -1, -1, ..., -1, -1, -1],
+       [-1, -1, -1, ..., -1, -1, -1],
+       ...,
+       [-1, -1, -1, ..., -1, -1, -1],
+       [-1, -1, -1, ..., -1, -1, -1],
+       [-1, -1, -1, ..., -1, -1, -1]], dtype=object)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### 17. obtaining distance based decay terms to initialise peak-gene matrix for training scDoRI</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="n">dist_matrix</span><span class="p">[</span><span class="n">dist_matrix</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">]</span><span class="o">=</span> <span class="mf">1e8</span>
+<span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">dist_matrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">config</span><span class="o">.</span><span class="n">peak_distance_scaling_factor</span><span class="p">)</span>
+<span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dist_matrix</span> <span class="o">&lt;</span> <span class="n">config</span><span class="o">.</span><span class="n">peak_distance_min_cutoff</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dist_matrix</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;gene_peak_distance_exp.npy&quot;</span><span class="p">,</span> <span class="n">dist_matrix</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="18.-Final-Logging,-completed-preprocessing">
+<h2>18. Final Logging, completed preprocessing<a class="headerlink" href="#18.-Final-Logging,-completed-preprocessing" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Pipeline completed successfully ===&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:__main__:=== Pipeline completed successfully ===
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Prepare-directories">1. Prepare directories</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Download-reference-genome,-gene-annotations-and-chromosome-sizes">2. Download reference genome, gene annotations and chromosome sizes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-Load-RNA-and-ATAC-anndata">3. Load RNA and ATAC anndata</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Find-cells-common-to-both-modalities-and-remove-mito-genes">4. Find cells common to both modalities and remove mito genes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#5.-Optionally-filter-anndata-to-protein-coding-genes">5. Optionally filter anndata to protein-coding genes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#6.-Selecting-highly-variable-genes-and-TFs">6. Selecting highly variable genes and TFs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#7.-Create-extended-gene-bed-file">7. Create extended gene bed file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#8.-Create-bed-file-for-all-peaks">8. Create bed file for all peaks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#9.-intersect-peaks-with-extended-gene-window">9. intersect peaks with extended gene window</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#10.-Create-metacells-and-store-in-.obs[%22leiden%22]">10. Create metacells and store in .obs[“leiden”]</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#11.-Keep-promoter-peaks-and-highly-variable-peaks-from-the-rest-=&gt;-total-#-=-num_peaks">11. Keep promoter peaks and highly variable peaks from the rest =&gt; total # = num_peaks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#12.-Save-processed-ATAC-and-RNA-data">12. Save processed ATAC and RNA data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#13.-Make-bed-file-for-final-set-of-peaks-(post-selection)">13. Make bed file for final set of peaks (post selection)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#14.-Compute-motif-matches-for-peaks">14. Compute motif matches for peaks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#15.-compute-insilico-chipseq">15. compute insilico-chipseq</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#18.-Final-Logging,-completed-preprocessing">18. Final Logging, completed preprocessing</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/notebooks/preprocessing.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Manu Saraswat.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scdori.downstream &#8212; scDoRI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for scdori.downstream</h1><div class="highlight"><pre>
+<span></span><span class="c1">###############################################</span>
+<span class="c1"># downstream.py</span>
+<span class="c1">###############################################</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">umap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">anndata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scdori</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scdori.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_seed</span><span class="p">,</span> <span class="n">log_nb_positive</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="load_best_model">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.load_best_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_best_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">best_model_path</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the best model weights from disk into the given model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The model instance to which the weights will be loaded.</span>
+<span class="sd">    best_model_path : str or Path</span>
+<span class="sd">        Path to the file containing the best model weights.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) where the model will be moved.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.nn.Module</span>
+<span class="sd">        The same model, now loaded with weights and set to eval mode.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the specified `best_model_path` does not exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">best_model_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best model file </span><span class="si">{</span><span class="n">best_model_path</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">best_model_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded best model weights from </span><span class="si">{</span><span class="n">best_model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="compute_neighbors_umap">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_neighbors_umap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbors_umap</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">rep_key</span><span class="o">=</span><span class="s2">&quot;X_scdori&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute neighbors and UMAP on the specified representation in an AnnData object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rna_anndata : anndata.AnnData</span>
+<span class="sd">        An AnnData object containing single-cell RNA data.</span>
+<span class="sd">    rep_key : str, optional</span>
+<span class="sd">        The key in `rna_anndata.obsm` that holds the latent representation used for computing UMAP.</span>
+<span class="sd">        Default is &quot;X_scdori&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Updates `rna_anndata` in place with neighbor graph and UMAP coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Computing neighbors + UMAP on scDoRI latent ===&quot;</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="n">rep_key</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_n_neighbors</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_min_dist</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_random_state</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done. UMAP stored in rna_anndata.obsm[&#39;X_umap&#39;].&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="compute_topic_peak_umap">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_topic_peak_umap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_topic_peak_umap</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a UMAP embedding of the topic-peak decoder matrix. Each point on this embedding is a peak.</span>
+
+<span class="sd">    Steps</span>
+<span class="sd">    -----</span>
+<span class="sd">    1. Apply softmax to `model.topic_peak_decoder` =&gt; (num_topics, num_peaks).</span>
+<span class="sd">    2. Min-max normalize across topics.</span>
+<span class="sd">    3. Transpose to get (num_peaks, num_topics).</span>
+<span class="sd">    4. Run UMAP on the resulting matrix to get a (num_peaks, 2) embedding.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The scDoRI model containing the topic_peak_decoder.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) used for PyTorch operations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple of (np.ndarray, np.ndarray)</span>
+<span class="sd">        embedding_peaks : shape (num_peaks, 2)</span>
+<span class="sd">            The UMAP embedding of the peaks.</span>
+<span class="sd">        peak_mat : shape (num_peaks, num_topics)</span>
+<span class="sd">            The min-max normalized topic-peak matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">topic_peaks</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">topic_peaks_smx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">topic_peaks</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># shape =&gt; (num_topics, num_peaks)</span>
+
+    <span class="c1"># min-max across topics</span>
+    <span class="n">tmin</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">topic_peaks_smx</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tmax</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">topic_peaks_smx</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">topic_peaks_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">topic_peaks_smx</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+
+    <span class="n">peak_mat</span> <span class="o">=</span> <span class="n">topic_peaks_norm</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>  <span class="c1"># shape =&gt; (num_peaks, num_topics)</span>
+
+    <span class="n">reducer</span> <span class="o">=</span> <span class="n">umap</span><span class="o">.</span><span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_n_neighbors</span><span class="p">,</span>
+                        <span class="n">min_dist</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_min_dist</span><span class="p">,</span>
+                        <span class="n">random_state</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">umap_random_state</span><span class="p">)</span>
+    <span class="n">embedding_peaks</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">peak_mat</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done. umap_embedding_peaks shape =&gt; </span><span class="si">{</span><span class="n">embedding_peaks</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> topic_embedding_peaks shape =&gt; </span><span class="si">{</span><span class="n">peak_mat</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">embedding_peaks</span><span class="p">,</span> <span class="n">peak_mat</span></div>
+
+
+<div class="viewcode-block" id="compute_topic_gene_matrix">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_topic_gene_matrix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_topic_gene_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a topic-gene matrix for downstream analysis (e.g., GSEA).</span>
+
+<span class="sd">    Steps</span>
+<span class="sd">    -----</span>
+<span class="sd">    1. Apply softmax to `model.topic_peak_decoder` =&gt; (num_topics, num_peaks).</span>
+<span class="sd">    2. Min-max normalize each peak across topics.</span>
+<span class="sd">    3. Multiply by (gene_peak_factor_fixed * gene_peak_factor_learnt).</span>
+<span class="sd">    4. Then apply batch norm and softmax.</span>
+<span class="sd">    4. Get Topic Gene matrix (num_topics, num_genes)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The scDoRI model containing topic_peak_decoder and gene_peak_factor.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) used for PyTorch operations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A matrix of shape (num_topics, num_genes) representing topic-gene scores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">topic_peaks</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">topic_peaks_smx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">topic_peaks</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># shape =&gt; (num_topics, num_peaks)</span>
+
+        <span class="n">gene_peak_factor1</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">gene_peak_factor2</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">gene_peak_factor</span> <span class="o">=</span> <span class="n">gene_peak_factor1</span> <span class="o">*</span> <span class="n">gene_peak_factor2</span>
+
+        <span class="n">tmin</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">topic_peaks_smx</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tmax</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">topic_peaks_smx</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">topic_peaks_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">topic_peaks_smx</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+
+        <span class="n">preds_gene</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">topic_peaks_norm</span><span class="p">,</span> <span class="n">gene_peak_factor</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">preds_gene</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">preds_gene</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])(</span><span class="n">preds_gene</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+        <span class="n">preds_gene</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">preds_gene</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done. computing topic gene matrix shape =&gt; </span><span class="si">{</span><span class="n">preds_gene</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">preds_gene</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="compute_atac_grn_activator_with_significance">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_atac_grn_activator_with_significance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_atac_grn_activator_with_significance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">cutoff_val</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute significant ATAC-derived TF–gene links for activators with permutation-based significance.</span>
+
+<span class="sd">    Uses only the learned peak-gene links and in silico ChIP-seq activator matrices.</span>
+<span class="sd">    Significance is computed by permuting TF-binding profiles on peaks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The trained model containing peak and TF decoders.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) for PyTorch operations.</span>
+<span class="sd">    cutoff_val : float</span>
+<span class="sd">        Significance cutoff (e.g., 0.95) for the percentile filtering.</span>
+<span class="sd">    outdir : str</span>
+<span class="sd">        Directory to save the computed GRN results.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A (num_topics, num_tfs, num_genes) array of significant ATAC-derived activator GRNs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">num_topics</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing significant ATAC-derived TF–gene links for activators. Output =&gt; </span><span class="si">{</span><span class="n">outdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">device</span> <span class="o">!=</span> <span class="n">device</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="n">topic_peaks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">model</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="p">)</span>
+        <span class="n">effective_gene_peak_factor1</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span>
+        <span class="n">effective_gene_peak_factor2</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span>
+        <span class="n">effective_gene_peak_factor</span> <span class="o">=</span> <span class="n">effective_gene_peak_factor1</span> <span class="o">*</span> <span class="n">effective_gene_peak_factor2</span>
+        <span class="n">insilico_chipseq_embeddings</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_activator</span>
+
+        <span class="n">grn_atac_significant1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cutoff_val1</span> <span class="o">=</span> <span class="n">cutoff_val</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_topics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_topics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">topic_gene_peak</span> <span class="o">=</span> <span class="p">(</span><span class="n">topic_peaks</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span> <span class="o">*</span> <span class="n">effective_gene_peak_factor</span>
+            <span class="n">topic_gene_tf</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">topic_gene_peak</span><span class="p">,</span> <span class="n">insilico_chipseq_embeddings</span><span class="p">)</span>
+            <span class="n">grn_fg</span> <span class="o">=</span> <span class="n">topic_gene_tf</span> <span class="o">/</span> <span class="p">(</span><span class="n">effective_gene_peak_factor</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+            <span class="n">grn_fg</span> <span class="o">=</span> <span class="n">grn_fg</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Compute background distribution by shuffling</span>
+            <span class="n">grn_bg_topic</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">num_permutations</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Permutations for Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                <span class="n">insilico_chipseq_random</span> <span class="o">=</span> <span class="n">insilico_chipseq_embeddings</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">insilico_chipseq_embeddings</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))]</span>
+                <span class="n">topic_gene_tf_bg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">topic_gene_peak</span><span class="p">,</span> <span class="n">insilico_chipseq_random</span><span class="p">)</span>
+                <span class="n">grn_bg</span> <span class="o">=</span> <span class="n">topic_gene_tf_bg</span> <span class="o">/</span> <span class="p">(</span><span class="n">effective_gene_peak_factor</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">grn_bg_topic</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_bg</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+
+            <span class="n">grn_bg_topic</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grn_bg_topic</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">cutoff1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">grn_bg_topic</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cutoff_val1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">grn_fg1</span> <span class="o">=</span> <span class="n">grn_fg</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">significant_grn1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">grn_fg1</span> <span class="o">&gt;</span> <span class="n">cutoff1</span><span class="p">,</span> <span class="n">grn_fg1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">significant_grn1</span> <span class="o">=</span> <span class="n">significant_grn1</span> <span class="o">/</span> <span class="p">(</span><span class="n">significant_grn1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span>
+            <span class="n">grn_atac_significant1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">significant_grn1</span><span class="p">)</span>
+
+        <span class="n">grn_atac_significant1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grn_atac_significant1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_atac_activator_</span><span class="si">{</span><span class="n">cutoff_val</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">),</span> <span class="n">grn_atac_significant1</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Completed computing activator ATAC GRNs.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grn_atac_significant1</span></div>
+
+
+<div class="viewcode-block" id="compute_atac_grn_repressor_with_significance">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_atac_grn_repressor_with_significance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_atac_grn_repressor_with_significance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">cutoff_val</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute significant ATAC-derived TF–gene links for repressors using permutation-based significance.</span>
+
+<span class="sd">    Uses the learned peak-gene links and in silico ChIP-seq repressor matrices.</span>
+<span class="sd">    Significance is computed by permuting TF-binding profiles on peaks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The trained model containing peak and TF decoders.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) for PyTorch operations.</span>
+<span class="sd">    cutoff_val : float</span>
+<span class="sd">        Significance cutoff (e.g., 0.05) for percentile filtering.</span>
+<span class="sd">    outdir : str</span>
+<span class="sd">        Directory to save the computed GRN results.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A (num_topics, num_tfs, num_genes) array of significant ATAC-derived repressor GRNs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">num_topics</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing significant ATAC-derived TF–gene links for repressors. Output =&gt; </span><span class="si">{</span><span class="n">outdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">device</span> <span class="o">!=</span> <span class="n">device</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="n">topic_peaks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">model</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="p">)</span>
+        <span class="n">effective_gene_peak_factor1</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span>
+        <span class="n">effective_gene_peak_factor2</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span>
+        <span class="n">effective_gene_peak_factor</span> <span class="o">=</span> <span class="n">effective_gene_peak_factor1</span> <span class="o">*</span> <span class="n">effective_gene_peak_factor2</span>
+        <span class="n">insilico_chipseq_embeddings_repressor</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_repressor</span>
+
+        <span class="n">grn_atac_significant1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cutoff_val1</span> <span class="o">=</span> <span class="n">cutoff_val</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_topics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_topics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">topic_gene_peak_rep</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">topic_peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-20</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">effective_gene_peak_factor</span>
+            <span class="n">topic_gene_tf</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">topic_gene_peak_rep</span><span class="p">,</span> <span class="n">insilico_chipseq_embeddings_repressor</span><span class="p">)</span>
+            <span class="n">grn_fg</span> <span class="o">=</span> <span class="n">topic_gene_tf</span> <span class="o">/</span> <span class="p">(</span><span class="n">effective_gene_peak_factor</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+            <span class="n">grn_fg</span> <span class="o">=</span> <span class="n">grn_fg</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="n">grn_bg_topic</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">num_permutations</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Permutations for Topic </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                <span class="n">insilico_chipseq_random</span> <span class="o">=</span> <span class="n">insilico_chipseq_embeddings_repressor</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">insilico_chipseq_embeddings_repressor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))]</span>
+                <span class="n">topic_gene_tf_bg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">topic_gene_peak_rep</span><span class="p">,</span> <span class="n">insilico_chipseq_random</span><span class="p">)</span>
+                <span class="n">grn_bg</span> <span class="o">=</span> <span class="n">topic_gene_tf_bg</span> <span class="o">/</span> <span class="p">(</span><span class="n">effective_gene_peak_factor</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                <span class="n">grn_bg_topic</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_bg</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+
+            <span class="n">grn_bg_topic</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grn_bg_topic</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">cutoff1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">grn_bg_topic</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">cutoff_val1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">grn_fg1</span> <span class="o">=</span> <span class="n">grn_fg</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">significant_grn1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">grn_fg1</span> <span class="o">&lt;</span> <span class="n">cutoff1</span><span class="p">,</span> <span class="n">grn_fg1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">significant_grn1</span> <span class="o">=</span> <span class="n">significant_grn1</span> <span class="o">/</span> <span class="p">(</span><span class="n">significant_grn1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span>
+            <span class="n">grn_atac_significant1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">significant_grn1</span><span class="p">)</span>
+
+        <span class="n">grn_atac_significant1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grn_atac_significant1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_atac_repressor_</span><span class="si">{</span><span class="n">cutoff_val</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">),</span> <span class="n">grn_atac_significant1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Completed computing repressor ATAC GRNs.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grn_atac_significant1</span></div>
+
+
+<div class="viewcode-block" id="compute_significant_grn">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_significant_grn">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_significant_grn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">cutoff_val_activator</span><span class="p">,</span> <span class="n">cutoff_val_repressor</span><span class="p">,</span> <span class="n">tf_normalised</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combine Significant ATAC-derived and scDoRI-learned GRN links into final activator and repressor GRNs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        The scDoRI model containing learned TF-gene topic parameters.</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        CPU or CUDA device for PyTorch operations.</span>
+<span class="sd">    cutoff_val_activator : float</span>
+<span class="sd">        Significance cutoff used for the activator GRN file.</span>
+<span class="sd">    cutoff_val_repressor : float</span>
+<span class="sd">        Significance cutoff used for the repressor GRN file.</span>
+<span class="sd">    tf_normalised : np.ndarray or torch.Tensor</span>
+<span class="sd">        A (num_topics x num_tfs, 1) or (num_topics x num_tfs) matrix of normalized TF usage.</span>
+<span class="sd">    outdir : str</span>
+<span class="sd">        Directory containing the ATAC-based GRN files and to save computed results.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple of np.ndarray</span>
+<span class="sd">        grn_act : shape (num_topics, num_tfs, num_genes)</span>
+<span class="sd">            Computed activator GRN array.</span>
+<span class="sd">        grn_rep : shape (num_topics, num_tfs, num_genes)</span>
+<span class="sd">            Computed repressor GRN array.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the required ATAC-derived GRN files are missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">activator_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_atac_activator_</span><span class="si">{</span><span class="n">cutoff_val_activator</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">)</span>
+    <span class="n">repressor_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_atac_repressor_</span><span class="si">{</span><span class="n">cutoff_val_repressor</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">)</span>
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">num_topics</span>
+    <span class="n">num_tfs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">num_tfs</span>
+
+    <span class="c1"># Check if ATAC-derived GRN files exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">activator_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Activator GRN file not found: </span><span class="si">{</span><span class="n">activator_path</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Please compute ATAC-based GRNs using the `compute_atac_grn_activator_with_significance` function first.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">repressor_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Repressor GRN file not found: </span><span class="si">{</span><span class="n">repressor_path</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Please compute ATAC-based GRNs using the `compute_atac_grn_repressor_with_significance` function first.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading ATAC-derived GRNs...&quot;</span><span class="p">)</span>
+    <span class="n">grn_atac_activator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">activator_path</span><span class="p">)</span>
+    <span class="n">grn_atac_repressor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">repressor_path</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing combined GRNs...&quot;</span><span class="p">)</span>
+
+    <span class="n">grn_rep</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">grn_atac_repressor</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_repressor_grn</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">grn_act</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">grn_atac_activator</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_activator_grn</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">grn_tot</span> <span class="o">=</span> <span class="n">grn_rep</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="o">+</span> <span class="n">grn_act</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">grn_tot</span> <span class="o">=</span> <span class="n">grn_tot</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">grn_rep</span> <span class="o">=</span> <span class="n">grn_tot</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">grn_rep</span><span class="p">[</span><span class="n">grn_rep</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">grn_rep</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tf_normalised</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">grn_rep</span>
+
+    <span class="n">grn_act</span> <span class="o">=</span> <span class="n">grn_tot</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">grn_act</span><span class="p">[</span><span class="n">grn_act</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">grn_act</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tf_normalised</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">grn_act</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saving computed GRNs...&quot;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_activator__</span><span class="si">{</span><span class="n">cutoff_val_activator</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">),</span> <span class="n">grn_act</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;grn_repressor__</span><span class="si">{</span><span class="n">cutoff_val_repressor</span><span class="si">}</span><span class="s1">.npy&#39;</span><span class="p">),</span> <span class="n">grn_rep</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;GRN computation completed successfully.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grn_act</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">grn_rep</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="save_regulons">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.save_regulons">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_regulons</span><span class="p">(</span><span class="n">grn_matrix</span><span class="p">,</span> <span class="n">tf_names</span><span class="p">,</span> <span class="n">gene_names</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;activator&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save regulons (TF-gene links across topics) for each TF based on a given GRN matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grn_matrix : np.ndarray</span>
+<span class="sd">        A GRN matrix of shape (num_topics, num_tfs, num_genes).</span>
+<span class="sd">    tf_names : list of str</span>
+<span class="sd">        List of transcription factor names, length = num_tfs.</span>
+<span class="sd">    gene_names : list of str</span>
+<span class="sd">        List of gene names, length = num_genes.</span>
+<span class="sd">    num_topics : int</span>
+<span class="sd">        Number of topics in the GRN matrix.</span>
+<span class="sd">    output_dir : str</span>
+<span class="sd">        Directory where the regulon files will be saved.</span>
+<span class="sd">    mode : str, optional</span>
+<span class="sd">        &quot;activator&quot; or &quot;repressor&quot;, used to name the output subdirectory/files.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Saves individual TSV files for each TF in `output_dir` of shape (num_topics, num_genes), where non-zero values represent a link.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;regulons_tf/</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tf_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tf_names</span><span class="p">):</span>
+        <span class="n">regulon</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">grn_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)],</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">gene_names</span>
+        <span class="p">)</span>
+        <span class="n">regulon</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tf_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">.tsv&quot;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> regulon for TF: </span><span class="si">{</span><span class="n">tf_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="visualize_downstream_targets">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.visualize_downstream_targets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">visualize_downstream_targets</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">gene_list</span><span class="p">,</span> <span class="n">score_name</span><span class="o">=</span><span class="s2">&quot;target_score&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize the average expression of given genes on a UMAP embedding.</span>
+
+<span class="sd">    Uses `scanpy.tl.score_genes` to compute a gene score, then plots using `scanpy.pl.umap`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rna_anndata : anndata.AnnData</span>
+<span class="sd">        The AnnData object containing RNA data with `.obsm[&quot;X_umap&quot;]`.</span>
+<span class="sd">    gene_list : list of str</span>
+<span class="sd">        A list of gene names to score.</span>
+<span class="sd">    score_name : str, optional</span>
+<span class="sd">        Name of the resulting gene score in `rna_anndata.obs`. Default is &quot;target_score&quot;.</span>
+<span class="sd">    layer : str, optional</span>
+<span class="sd">        Which layer to use if needed in `score_genes`. Default is &quot;log&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Plots the UMAP colored by the computed gene score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">score_genes</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">gene_list</span><span class="p">,</span> <span class="n">score_name</span><span class="o">=</span><span class="n">score_name</span><span class="p">)</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">score_name</span><span class="p">],</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_topic_activation_heatmap">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.plot_topic_activation_heatmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_topic_activation_heatmap</span><span class="p">(</span><span class="n">rna_anndata</span><span class="p">,</span> <span class="n">groupby_key</span><span class="o">=</span><span class="s2">&quot;celltype&quot;</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute aggregated scDoRI latent topic activation across groups, then plot a clustermap.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rna_anndata : anndata.AnnData</span>
+<span class="sd">        An AnnData object containing scDoRI latent factors in `obsm[&quot;X_scdori&quot;]`.</span>
+<span class="sd">    groupby_key : str, optional</span>
+<span class="sd">        Column in `rna_anndata.obs` by which to group cells. Default is &quot;celltype&quot;.</span>
+<span class="sd">    aggregation : str, optional</span>
+<span class="sd">        Either &quot;median&quot; or &quot;mean&quot; for aggregating factor values per group. Default is &quot;median&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        The transposed aggregated DataFrame (topics x groups).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Uses a Seaborn clustermap to visualize the aggregated data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">latent</span> <span class="o">=</span> <span class="n">rna_anndata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;X_scdori&quot;</span><span class="p">]</span>  <span class="c1"># shape (n_cells, num_topics)</span>
+    <span class="n">df_latent</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">latent</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">latent</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+    <span class="n">df_latent</span><span class="p">[</span><span class="n">groupby_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">rna_anndata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">groupby_key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
+        <span class="n">df_grouped</span> <span class="o">=</span> <span class="n">df_latent</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groupby_key</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_grouped</span> <span class="o">=</span> <span class="n">df_latent</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groupby_key</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">font_scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">clustermap</span><span class="p">(</span><span class="n">df_grouped</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu_r&quot;</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">df_grouped</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="get_top_activators_per_topic">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.get_top_activators_per_topic">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_top_activators_per_topic</span><span class="p">(</span>
+    <span class="n">grn_final</span><span class="p">,</span>  <span class="c1"># =&gt; shape (num_topics, num_tfs, num_genes)</span>
+    <span class="n">tf_names</span><span class="p">,</span>   <span class="c1"># list of TF names =&gt; length = num_tfs</span>
+    <span class="n">latent_all_torch</span><span class="p">,</span>  <span class="c1"># shape (num_cells, num_topics)</span>
+    <span class="n">selected_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">top_k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">clamp_value</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">zscore</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">out_fig</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify and plot top activator transcription factors per topic (Topic regulators, TRs).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grn_final : np.ndarray or torch.Tensor</span>
+<span class="sd">        An array of shape (num_topics, num_tfs, num_genes), representing an activator GRN.</span>
+<span class="sd">    tf_names : list of str</span>
+<span class="sd">        List of TF names, length = num_tfs.</span>
+<span class="sd">    latent_all_torch : np.ndarray or torch.Tensor</span>
+<span class="sd">        scDoRI latent topic activity of shape (num_cells, num_topics). Not always used, but can be referenced.</span>
+<span class="sd">    selected_topics : list of int, optional</span>
+<span class="sd">        Which topics to analyze. If None, all topics are used.</span>
+<span class="sd">    top_k : int, optional</span>
+<span class="sd">        Number of top TFs to select per topic. Default is 10.</span>
+<span class="sd">    clamp_value : float, optional</span>
+<span class="sd">        Small cutoff to avoid division by zero. Default is 1e-8.</span>
+<span class="sd">    zscore : bool, optional</span>
+<span class="sd">        If True, apply z-score normalization across topics in the final matrix. Default is True.</span>
+<span class="sd">    figsize : tuple, optional</span>
+<span class="sd">        Size for the Seaborn clustermap. Default is (25, 10).</span>
+<span class="sd">    out_fig : str or Path, optional</span>
+<span class="sd">        If provided, the figure is saved to this path; otherwise it is shown.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        df_topic_grn : pd.DataFrame</span>
+<span class="sd">            The final DataFrame of shape (#topics, #TF).</span>
+<span class="sd">        selected_tf : list of str</span>
+<span class="sd">            A sorted list of TFs used in the final clustermap.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Plotting top activator regulators per topic ===&quot;</span><span class="p">)</span>
+
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_tfs</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">selected_topics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">topic_tf_grn_norm</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grn_final</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="c1"># sum across genes =&gt; shape =&gt; (num_tfs,)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+        <span class="n">grn_topic</span> <span class="o">=</span> <span class="n">grn_final_np</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">topic_tf_grn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span><span class="p">)</span>
+        <span class="n">total_activity</span> <span class="o">=</span> <span class="n">grn_topic</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">clamp_value</span>
+        <span class="n">topic_tf_grn_norm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span> <span class="o">/</span> <span class="n">total_activity</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn</span><span class="p">)</span>
+    <span class="n">topic_tf_grn_norm_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn_norm</span><span class="p">)</span>
+
+    <span class="n">df_topic_grn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">topic_tf_grn_norm_act</span><span class="p">[</span><span class="n">selected_topics</span><span class="p">],</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">tf_names</span><span class="p">,</span>
+        <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">selected_topics</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zscore</span><span class="p">:</span>
+        <span class="n">df_topic_grn</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_topic_grn</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row_name</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">top_tfs</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">top_k</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">selected_tf</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">top_tfs</span><span class="p">)</span>
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">selected_tf</span><span class="p">)</span>
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">selected_tf</span><span class="p">)</span>
+
+    <span class="n">df_plot</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="p">[</span><span class="n">selected_tf</span><span class="p">]</span>
+
+    <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.facecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">font_scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">clustermap</span><span class="p">(</span>
+        <span class="n">df_plot</span><span class="p">,</span>
+        <span class="n">row_cluster</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">col_cluster</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+        <span class="n">dendrogram_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Spectral&#39;</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">4</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">annot_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">out_fig</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_fig</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Done plotting top regulators per topic ===&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_topic_grn</span><span class="p">,</span> <span class="n">selected_tf</span></div>
+
+
+<div class="viewcode-block" id="get_top_repressor_per_topic">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.get_top_repressor_per_topic">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_top_repressor_per_topic</span><span class="p">(</span>
+    <span class="n">grn_final</span><span class="p">,</span>  <span class="c1"># =&gt; shape (num_topics, num_tfs, num_genes)</span>
+    <span class="n">tf_names</span><span class="p">,</span>   <span class="c1"># list of TF names =&gt; length = num_tfs</span>
+    <span class="n">latent_all_torch</span><span class="p">,</span>  <span class="c1"># shape (num_cells, num_topics)</span>
+    <span class="n">selected_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">clamp_value</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">zscore</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">out_fig</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify and plot top repressor transcription factors per topic.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grn_final : np.ndarray or torch.Tensor</span>
+<span class="sd">        An array of shape (num_topics, num_tfs, num_genes), representing a repressor GRN.</span>
+<span class="sd">    tf_names : list of str</span>
+<span class="sd">        List of TF names, length = num_tfs.</span>
+<span class="sd">    latent_all_torch : np.ndarray or torch.Tensor</span>
+<span class="sd">        scDoRI latent topic activity of shape (num_cells, num_topics).</span>
+<span class="sd">    selected_topics : list of int, optional</span>
+<span class="sd">        Which topics to analyze. If None, all topics are used.</span>
+<span class="sd">    top_k : int, optional</span>
+<span class="sd">        Number of top TFs to select per topic. Default is 5.</span>
+<span class="sd">    clamp_value : float, optional</span>
+<span class="sd">        Small cutoff to avoid division by zero. Default is 1e-8.</span>
+<span class="sd">    zscore : bool, optional</span>
+<span class="sd">        If True, apply z-score normalization across topics in the final matrix. Default is True.</span>
+<span class="sd">    figsize : tuple, optional</span>
+<span class="sd">        Size for the Seaborn clustermap. Default is (25, 10).</span>
+<span class="sd">    out_fig : str or Path, optional</span>
+<span class="sd">        If provided, the figure is saved to this path; otherwise it is shown.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        df_plot : pd.DataFrame</span>
+<span class="sd">            The final DataFrame of shape (#topics, #TF).</span>
+<span class="sd">        selected_tf : list of str</span>
+<span class="sd">            A sorted list of TFs used in the final clustermap.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Plotting top repressor regulators per topic ===&quot;</span><span class="p">)</span>
+
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_tfs</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">selected_topics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">topic_tf_grn_norm</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grn_final</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+        <span class="n">grn_topic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">grn_final_np</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">topic_tf_grn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span><span class="p">)</span>
+        <span class="n">total_activity</span> <span class="o">=</span> <span class="n">grn_topic</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">clamp_value</span>
+        <span class="n">topic_tf_grn_norm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span> <span class="o">/</span> <span class="n">total_activity</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn</span><span class="p">)</span>
+    <span class="n">topic_tf_grn_norm_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn_norm</span><span class="p">)</span>
+
+    <span class="n">df_topic_grn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">topic_tf_grn_norm_rep</span><span class="p">[</span><span class="n">selected_topics</span><span class="p">],</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">tf_names</span><span class="p">,</span>
+        <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">selected_topics</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zscore</span><span class="p">:</span>
+        <span class="n">df_topic_grn</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_topic_grn</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row_name</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">top_tfs</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">top_k</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">selected_tf</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">top_tfs</span><span class="p">)</span>
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">selected_tf</span><span class="p">)</span>
+    <span class="n">selected_tf</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">selected_tf</span><span class="p">)</span>
+
+    <span class="n">df_plot</span> <span class="o">=</span> <span class="n">df_topic_grn</span><span class="p">[</span><span class="n">selected_tf</span><span class="p">]</span>
+
+    <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.facecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">font_scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">clustermap</span><span class="p">(</span>
+        <span class="n">df_plot</span><span class="p">,</span>
+        <span class="n">row_cluster</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">col_cluster</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+        <span class="n">dendrogram_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Spectral&#39;</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">4</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">annot_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">out_fig</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_fig</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Done plotting top repressor regulators per topic ===&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_plot</span><span class="p">,</span> <span class="n">selected_tf</span></div>
+
+
+<div class="viewcode-block" id="compute_activator_tf_activity_per_cell">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_activator_tf_activity_per_cell">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_activator_tf_activity_per_cell</span><span class="p">(</span>
+    <span class="n">grn_final</span><span class="p">,</span>  <span class="c1"># =&gt; shape (num_topics, num_tfs, num_genes)</span>
+    <span class="n">tf_names</span><span class="p">,</span>   <span class="c1"># list of TF names =&gt; length = num_tfs</span>
+    <span class="n">latent_all_torch</span><span class="p">,</span>  <span class="c1"># shape (num_cells, num_topics)</span>
+    <span class="n">selected_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">clamp_value</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">zscore</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute per-cell activity of activator TFs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grn_final : np.ndarray or torch.Tensor</span>
+<span class="sd">        Activator GRN of shape (num_topics, num_tfs, num_genes).</span>
+<span class="sd">    tf_names : list of str</span>
+<span class="sd">        List of TF names, length = num_tfs.</span>
+<span class="sd">    latent_all_torch : np.ndarray or torch.Tensor</span>
+<span class="sd">        scDoRI latent topic activity of shape (num_cells, num_topics).</span>
+<span class="sd">    selected_topics : list of int, optional</span>
+<span class="sd">        Which topics to analyze. If None, all topics are used.</span>
+<span class="sd">    clamp_value : float, optional</span>
+<span class="sd">        Small constant to avoid division by zero. Default is 1e-8.</span>
+<span class="sd">    zscore : bool, optional</span>
+<span class="sd">        If True, apply z-score normalization across cells in the final matrix. Default is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A (num_cells, num_tfs) array of TF activity values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Computing TF activity per cell ===&quot;</span><span class="p">)</span>
+
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_tfs</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">selected_topics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">topic_tf_grn_norm</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grn_final</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+        <span class="n">grn_topic</span> <span class="o">=</span> <span class="n">grn_final_np</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">topic_tf_grn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span><span class="p">)</span>
+        <span class="n">total_activity</span> <span class="o">=</span> <span class="n">grn_topic</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">clamp_value</span>
+        <span class="n">topic_tf_grn_norm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span> <span class="o">/</span> <span class="n">total_activity</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn</span><span class="p">)</span>
+    <span class="n">topic_tf_grn_norm_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn_norm</span><span class="p">)</span>
+
+    <span class="n">cell_tf_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,jk-&gt;ik&#39;</span><span class="p">,</span> <span class="n">latent_all_torch</span><span class="p">,</span> <span class="n">topic_tf_grn_norm_act</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zscore</span><span class="p">:</span>
+        <span class="n">cell_tf_act</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">cell_tf_act</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cell_tf_act</span></div>
+
+
+<div class="viewcode-block" id="compute_repressor_tf_activity_per_cell">
+<a class="viewcode-back" href="../../scdori.html#scdori.downstream.compute_repressor_tf_activity_per_cell">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_repressor_tf_activity_per_cell</span><span class="p">(</span>
+    <span class="n">grn_final</span><span class="p">,</span>  <span class="c1"># =&gt; shape (num_topics, num_tfs, num_genes)</span>
+    <span class="n">tf_names</span><span class="p">,</span>   <span class="c1"># list of TF names =&gt; length = num_tfs</span>
+    <span class="n">latent_all_torch</span><span class="p">,</span>  <span class="c1"># shape (num_cells, num_topics)</span>
+    <span class="n">selected_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">clamp_value</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">zscore</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute per-cell activity of repressor TFs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grn_final : np.ndarray or torch.Tensor</span>
+<span class="sd">        Repressor GRN of shape (num_topics, num_tfs, num_genes).</span>
+<span class="sd">    tf_names : list of str</span>
+<span class="sd">        List of TF names, length = num_tfs.</span>
+<span class="sd">    latent_all_torch : np.ndarray or torch.Tensor</span>
+<span class="sd">        scDoRI latent topic activity of shape (num_cells, num_topics).</span>
+<span class="sd">    selected_topics : list of int, optional</span>
+<span class="sd">        Which topics to analyze. If None, all topics are used.</span>
+<span class="sd">    clamp_value : float, optional</span>
+<span class="sd">        Small constant to avoid division by zero. Default is 1e-8.</span>
+<span class="sd">    zscore : bool, optional</span>
+<span class="sd">        If True, apply z-score normalization across cells in the final matrix. Default is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        A (num_cells, num_tfs) array of TF activity values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=== Computing TF activity per cell ===&quot;</span><span class="p">)</span>
+
+    <span class="n">num_topics</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_tfs</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">selected_topics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">topic_tf_grn_norm</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grn_final</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">grn_final_np</span> <span class="o">=</span> <span class="n">grn_final</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_topics</span><span class="p">):</span>
+        <span class="n">grn_topic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">grn_final_np</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">topic_tf_grn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span><span class="p">)</span>
+        <span class="n">total_activity</span> <span class="o">=</span> <span class="n">grn_topic</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">clamp_value</span>
+        <span class="n">topic_tf_grn_norm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grn_topic</span> <span class="o">/</span> <span class="n">total_activity</span><span class="p">)</span>
+
+    <span class="n">topic_tf_grn_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn</span><span class="p">)</span>
+    <span class="n">topic_tf_grn_norm_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_tf_grn_norm</span><span class="p">)</span>
+
+    <span class="n">cell_tf_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,jk-&gt;ik&#39;</span><span class="p">,</span> <span class="n">latent_all_torch</span><span class="p">,</span> <span class="n">topic_tf_grn_norm_rep</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zscore</span><span class="p">:</span>
+        <span class="n">cell_tf_rep</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">cell_tf_rep</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cell_tf_rep</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scDoRI</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocessing_pipeline.html">Preprocessing Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scdori.html">scDORI training</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Manu Saraswat.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

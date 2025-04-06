@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scdori.models &#8212; scDoRI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for scdori.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="scDoRI">
+<a class="viewcode-back" href="../../scdori.html#scdori.models.scDoRI">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">scDoRI</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The scDoRI model integrates single cell multi-ome RNA and ATAC data to learn latent topic</span>
+<span class="sd">    representations and perform gene regulatory network (GRN) inference.</span>
+
+<span class="sd">    This model contains:</span>
+<span class="sd">    - **Encoders** for RNA and ATAC, producing a shared topic distribution.</span>
+<span class="sd">    - **Decoders** for ATAC, TF, and RNA reconstruction.</span>
+<span class="sd">    - **GRN logic** for combining TF binding data with gene-peak links and tf expression to reconstruct RNA profiles.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    device : torch.device</span>
+<span class="sd">        The device (CPU or CUDA) for PyTorch operations.</span>
+<span class="sd">    num_genes : int</span>
+<span class="sd">        Number of genes in the RNA data.</span>
+<span class="sd">    num_peaks : int</span>
+<span class="sd">        Number of peaks in the ATAC data.</span>
+<span class="sd">    num_tfs : int</span>
+<span class="sd">        Number of transcription factors being modeled.</span>
+<span class="sd">    num_topics : int</span>
+<span class="sd">        Number of latent topics or factors.</span>
+<span class="sd">    num_batches : int</span>
+<span class="sd">        Number of distinct batches (for batch correction).</span>
+<span class="sd">    dim_encoder1 : int</span>
+<span class="sd">        Dimension of the first encoder layer.</span>
+<span class="sd">    dim_encoder2 : int</span>
+<span class="sd">        Dimension of the second encoder layer.</span>
+<span class="sd">    batch_norm : bool, optional</span>
+<span class="sd">        If True, use batch normalization in encoder and library factor MLPs. Default is True.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    encoder_rna : torch.nn.Sequential</span>
+<span class="sd">        The neural network layers for the RNA encoder.</span>
+<span class="sd">    encoder_atac : torch.nn.Sequential</span>
+<span class="sd">        The neural network layers for the ATAC encoder.</span>
+<span class="sd">    mu_theta : torch.nn.Linear</span>
+<span class="sd">        Linear layer converting combined RNA+ATAC encoder outputs into raw topic logits.</span>
+<span class="sd">    topic_peak_decoder : torch.nn.Parameter</span>
+<span class="sd">        A (num_topics x num_peaks) parameter for ATAC reconstruction.</span>
+<span class="sd">    atac_batch_factor : torch.nn.Parameter</span>
+<span class="sd">        A (num_batches x num_peaks) parameter for batch effects in ATAC.</span>
+<span class="sd">    atac_batch_norm : torch.nn.BatchNorm1d</span>
+<span class="sd">        Batch normalization layer for ATAC predictions.</span>
+<span class="sd">    topic_tf_decoder : torch.nn.Parameter</span>
+<span class="sd">        A (num_topics x num_tfs) parameter for TF expression reconstruction.</span>
+<span class="sd">    tf_batch_factor : torch.nn.Parameter</span>
+<span class="sd">        A (num_batches x num_tfs) parameter for batch effects in TF reconstruction.</span>
+<span class="sd">    tf_batch_norm : torch.nn.BatchNorm1d</span>
+<span class="sd">        Batch normalization layer for TF predictions.</span>
+<span class="sd">    tf_alpha_nb : torch.nn.Parameter</span>
+<span class="sd">        A (1 x num_tfs) parameter for TF negative binomial overdispersion.</span>
+<span class="sd">    gene_peak_factor_learnt : torch.nn.Parameter</span>
+<span class="sd">        A (num_genes x num_peaks) learned matrix linking peaks to genes.</span>
+<span class="sd">    gene_peak_factor_fixed : torch.nn.Parameter</span>
+<span class="sd">        A (num_genes x num_peaks) fixed mask for feasible gene-peak links.</span>
+<span class="sd">    rna_batch_factor : torch.nn.Parameter</span>
+<span class="sd">        A (num_batches x num_genes) parameter for batch effects in RNA reconstruction.</span>
+<span class="sd">    rna_batch_norm : torch.nn.BatchNorm1d</span>
+<span class="sd">        Batch normalization layer for RNA predictions.</span>
+<span class="sd">    rna_alpha_nb : torch.nn.Parameter</span>
+<span class="sd">        A (1 x num_genes) parameter for RNA negative binomial overdispersion.</span>
+<span class="sd">    tf_library_factor : torch.nn.Sequential</span>
+<span class="sd">        An MLP to predict library scaling factor for TF data from the observed TF expression.</span>
+<span class="sd">    rna_library_factor : torch.nn.Sequential</span>
+<span class="sd">        An MLP to predict library scaling factor for RNA data from the observed gene counts.</span>
+<span class="sd">    tf_binding_matrix_activator : torch.nn.Parameter</span>
+<span class="sd">        A (num_peaks x num_tfs) matrix of in silico ChIP-seq (activator) TF-peak binding; precomputed and fixed.</span>
+<span class="sd">    tf_binding_matrix_repressor : torch.nn.Parameter</span>
+<span class="sd">        A (num_peaks x num_tfs) matrix of in silico ChIP-seq (repressor) TF-peak binding; precomputed and fixed.</span>
+<span class="sd">    tf_gene_topic_activator_grn : torch.nn.Parameter</span>
+<span class="sd">        A (num_topics x num_tfs x num_genes) matrix capturing per-topic activator regulation.</span>
+<span class="sd">    tf_gene_topic_repressor_grn : torch.nn.Parameter</span>
+<span class="sd">        A (num_topics x num_tfs x num_genes) matrix capturing per-topic repressor regulation.</span>
+<span class="sd">    rna_grn_batch_factor : torch.nn.Parameter</span>
+<span class="sd">        A (num_batches x num_genes) batch-effect parameter for the GRN-based RNA reconstruction (module 4).</span>
+<span class="sd">    rna_grn_batch_norm : torch.nn.BatchNorm1d</span>
+<span class="sd">        Batch normalization layer for GRN-based RNA predictions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">,</span>
+        <span class="n">num_genes</span><span class="p">,</span>
+        <span class="n">num_peaks</span><span class="p">,</span>
+        <span class="n">num_tfs</span><span class="p">,</span>
+        <span class="n">num_topics</span><span class="p">,</span>
+        <span class="n">num_batches</span><span class="p">,</span>
+        <span class="n">dim_encoder1</span><span class="p">,</span>
+        <span class="n">dim_encoder2</span><span class="p">,</span>
+        <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">scDoRI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_genes</span> <span class="o">=</span> <span class="n">num_genes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_peaks</span> <span class="o">=</span> <span class="n">num_peaks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_tfs</span> <span class="o">=</span> <span class="n">num_tfs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span> <span class="o">=</span> <span class="n">num_topics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_batches</span> <span class="o">=</span> <span class="n">num_batches</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_encoder1</span> <span class="o">=</span> <span class="n">dim_encoder1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_encoder2</span> <span class="o">=</span> <span class="n">dim_encoder2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span> <span class="o">=</span> <span class="n">batch_norm</span>
+
+        <span class="c1"># ENCODER for RNA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_rna</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_genes</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dim_encoder1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">,</span> <span class="n">dim_encoder2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># ENCODER for ATAC</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_atac</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_peaks</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dim_encoder1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">,</span> <span class="n">dim_encoder2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu_theta</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder2</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num_topics</span><span class="p">)</span>
+
+        <span class="c1"># ATAC decoder (module 1)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic_peak_decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_peaks</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atac_batch_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">num_peaks</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atac_batch_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">num_peaks</span><span class="p">)</span>
+        
+        <span class="c1"># RNA from ATAC (module 2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_genes</span><span class="p">,</span> <span class="n">num_peaks</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_genes</span><span class="p">,</span> <span class="n">num_peaks</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_batch_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">num_genes</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_batch_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">num_genes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_alpha_nb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_genes</span><span class="p">))</span>
+
+        <span class="c1"># TF decoder (module 3)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic_tf_decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_batch_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_batch_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">num_tfs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_alpha_nb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">))</span>
+
+        
+
+        <span class="c1"># MLP for library factor (TF, RNA)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_library_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_tfs</span><span class="p">,</span> <span class="n">dim_encoder2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">,</span> <span class="n">dim_encoder1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_library_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_genes</span><span class="p">,</span> <span class="n">dim_encoder2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder2</span><span class="p">,</span> <span class="n">dim_encoder1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_norm</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">dim_encoder1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># GRN portion (module 4)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_binding_matrix_activator</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_peaks</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_binding_matrix_repressor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_peaks</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_gene_topic_activator_grn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">,</span> <span class="n">num_genes</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tf_gene_topic_repressor_grn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_topics</span><span class="p">,</span> <span class="n">num_tfs</span><span class="p">,</span> <span class="n">num_genes</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_grn_batch_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">num_genes</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rna_grn_batch_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">num_genes</span><span class="p">)</span>
+
+<div class="viewcode-block" id="scDoRI.encode">
+<a class="viewcode-back" href="../../scdori.html#scdori.models.scDoRI.encode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rna_input</span><span class="p">,</span> <span class="n">atac_input</span><span class="p">,</span> <span class="n">log_lib_rna</span><span class="p">,</span> <span class="n">log_lib_atac</span><span class="p">,</span> <span class="n">num_cells</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encode RNA and ATAC input into a topic distribution (theta).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rna_input : torch.Tensor</span>
+<span class="sd">            A (B, num_genes) tensor of RNA counts per cell.</span>
+<span class="sd">        atac_input : torch.Tensor</span>
+<span class="sd">            A (B, num_peaks) tensor of ATAC counts per cell.</span>
+<span class="sd">        log_lib_rna : torch.Tensor</span>
+<span class="sd">            A (B, 1) tensor of log RNA library sizes.</span>
+<span class="sd">        log_lib_atac : torch.Tensor</span>
+<span class="sd">            A (B, 1) tensor of log ATAC library sizes.</span>
+<span class="sd">        num_cells : torch.Tensor</span>
+<span class="sd">            A (B, 1) tensor representing how many cells are aggregated (if metacells),</span>
+<span class="sd">            or all ones for single-cell data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (theta, mu_theta) : tuple of torch.Tensor</span>
+<span class="sd">            theta    : (B, num_topics), softmaxed topic distribution.</span>
+<span class="sd">            mu_theta : (B, num_topics), raw topic logits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">rna_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Concat RNA input, log_lib_rna, and num_cells</span>
+        <span class="n">x_rna</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">rna_input</span><span class="p">,</span> <span class="n">log_lib_rna</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">num_cells</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">x_atac</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">atac_input</span><span class="p">,</span> <span class="n">log_lib_atac</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">num_cells</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">qrna</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_rna</span><span class="p">(</span><span class="n">x_rna</span><span class="p">)</span>
+        <span class="n">qatac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_atac</span><span class="p">(</span><span class="n">x_atac</span><span class="p">)</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">qrna</span><span class="p">,</span> <span class="n">qatac</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mu_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu_theta</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">mu_theta</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">theta</span><span class="p">,</span> <span class="n">mu_theta</span></div>
+
+
+<div class="viewcode-block" id="scDoRI.forward">
+<a class="viewcode-back" href="../../scdori.html#scdori.models.scDoRI.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">rna_input</span><span class="p">,</span>
+        <span class="n">atac_input</span><span class="p">,</span>
+        <span class="n">tf_input</span><span class="p">,</span>
+        <span class="n">topic_tf_input</span><span class="p">,</span>
+        <span class="n">log_lib_rna</span><span class="p">,</span>
+        <span class="n">log_lib_atac</span><span class="p">,</span>
+        <span class="n">num_cells</span><span class="p">,</span>
+        <span class="n">batch_onehot</span><span class="p">,</span>
+        <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;warmup_1&quot;</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward pass through scDoRI, producing predictions for ATAC, TF, and RNA </span>
+<span class="sd">        reconstructions (Phase 1), as well as GRN-based RNA predictions in GRN phase (Phase 2).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rna_input : torch.Tensor</span>
+<span class="sd">            Shape (B, num_genes). RNA counts per cell in the batch.</span>
+<span class="sd">        atac_input : torch.Tensor</span>
+<span class="sd">            Shape (B, num_peaks). ATAC counts per cell in the batch.</span>
+<span class="sd">        tf_input : torch.Tensor</span>
+<span class="sd">            Shape (B, num_tfs). Observed TF expression.</span>
+<span class="sd">        topic_tf_input : torch.Tensor</span>
+<span class="sd">            Shape (num_topics, num_tfs). TF expression aggregated by topic,</span>
+<span class="sd">            used only if phase == &quot;grn&quot;.</span>
+<span class="sd">        log_lib_rna : torch.Tensor</span>
+<span class="sd">            Shape (B, 1). Log of RNA library sizes.</span>
+<span class="sd">        log_lib_atac : torch.Tensor</span>
+<span class="sd">            Shape (B, 1). Log of ATAC library sizes.</span>
+<span class="sd">        num_cells : torch.Tensor</span>
+<span class="sd">            Shape (B, 1). Number of cells aggregated (if metacells), else ones.</span>
+<span class="sd">        batch_onehot : torch.Tensor</span>
+<span class="sd">            Shape (B, num_batches). One-hot batch encoding for each cell.</span>
+<span class="sd">        phase : str, optional</span>
+<span class="sd">            Which training phase: &quot;warmup_1&quot;, &quot;warmup_2&quot;, or &quot;grn&quot;. </span>
+<span class="sd">            If phase==&quot;grn&quot;, the GRN-based RNA predictions are included.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A dictionary with the following keys:</span>
+<span class="sd">            - &quot;theta&quot;: (B, num_topics), the softmaxed topic distribution.</span>
+<span class="sd">            - &quot;mu_theta&quot;: (B, num_topics), raw topic logits.</span>
+<span class="sd">            - &quot;preds_atac&quot;: (B, num_peaks), predicted peak accessibility.</span>
+<span class="sd">            - &quot;preds_tf&quot;: (B, num_tfs), predicted TF expression.</span>
+<span class="sd">            - &quot;mu_nb_tf&quot;: (B, num_tfs), TF negative binomial mean = preds_tf * TF library factor.</span>
+<span class="sd">            - &quot;preds_rna&quot;: (B, num_genes), predicted RNA expression.</span>
+<span class="sd">            - &quot;mu_nb_rna&quot;: (B, num_genes), RNA negative binomial mean = preds_rna * RNA library factor.</span>
+<span class="sd">            - &quot;preds_rna_from_grn&quot;: (B, num_genes), optional GRN-based RNA predictions.</span>
+<span class="sd">            - &quot;mu_nb_rna_grn&quot;: (B, num_genes), negative binomial mean of GRN-based RNA predictions.</span>
+<span class="sd">            - &quot;library_factor_tf&quot;: (B, 1), predicted library factor for TF.</span>
+<span class="sd">            - &quot;library_factor_rna&quot;: (B, 1), predicted library factor for RNA.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">rna_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># 1) ENCODE =&gt; topic distribution</span>
+        <span class="n">theta</span><span class="p">,</span> <span class="n">mu_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">rna_input</span><span class="p">,</span> <span class="n">atac_input</span><span class="p">,</span> <span class="n">log_lib_rna</span><span class="p">,</span> <span class="n">log_lib_atac</span><span class="p">,</span> <span class="n">num_cells</span><span class="p">)</span>
+
+        <span class="c1"># 2) ATAC decoding</span>
+        <span class="n">batch_factor_atac</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">batch_onehot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atac_batch_factor</span><span class="p">)</span>
+        <span class="n">preds_atac</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_factor_atac</span>
+        <span class="n">preds_atac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atac_batch_norm</span><span class="p">(</span><span class="n">preds_atac</span><span class="p">)</span>
+        <span class="n">preds_atac</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">preds_atac</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># 3) TF decoding =&gt; library factor</span>
+        <span class="n">batch_factor_tf</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">batch_onehot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_batch_factor</span><span class="p">)</span>
+        <span class="n">tf_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_tf_decoder</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_factor_tf</span>
+        <span class="n">tf_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_batch_norm</span><span class="p">(</span><span class="n">tf_logits</span><span class="p">)</span>
+        <span class="n">preds_tf</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">tf_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># library MLP for TF</span>
+        <span class="n">library_factor_tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_library_factor</span><span class="p">(</span><span class="n">tf_input</span><span class="p">)</span>
+        <span class="n">mu_nb_tf</span> <span class="o">=</span> <span class="n">preds_tf</span> <span class="o">*</span> <span class="n">library_factor_tf</span>
+
+        <span class="c1"># 4) RNA from ATAC =&gt; library factor</span>
+        <span class="n">topic_peak_denoised1</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">topic_peak_min</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">topic_peak_denoised1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">topic_peak_max</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">topic_peak_denoised1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">topic_peak_denoised</span> <span class="o">=</span> <span class="p">(</span><span class="n">topic_peak_denoised1</span> <span class="o">-</span> <span class="n">topic_peak_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">topic_peak_max</span> <span class="o">-</span> <span class="n">topic_peak_min</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+        <span class="n">gene_peak</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">batch_factor_rna</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">batch_onehot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rna_batch_factor</span><span class="p">)</span>
+        <span class="n">topicxgene</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">topic_peak_denoised</span><span class="p">,</span> <span class="n">gene_peak</span><span class="p">)</span>
+        <span class="n">rna_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">topicxgene</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_factor_rna</span>
+        <span class="n">rna_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rna_batch_norm</span><span class="p">(</span><span class="n">rna_logits</span><span class="p">)</span>
+        <span class="n">preds_rna</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">rna_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">topic_peak_denoised1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_peak_decoder</span><span class="p">)</span>
+
+        <span class="c1"># library MLP for RNA</span>
+        <span class="n">library_factor_rna</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rna_library_factor</span><span class="p">(</span><span class="n">rna_input</span><span class="p">)</span>
+        <span class="n">mu_nb_rna</span> <span class="o">=</span> <span class="n">preds_rna</span> <span class="o">*</span> <span class="n">library_factor_rna</span>
+
+        <span class="c1"># 5) GRN =&gt; preds_rna_from_grn if phase==&quot;grn&quot;</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;grn&quot;</span><span class="p">:</span>
+            <span class="n">grn_atac_activator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_tfs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_genes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">grn_atac_repressor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_tfs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_genes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="c1"># Calculate ATAC-based TF–gene links (activator/repressor) for each topic</span>
+            <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span><span class="p">):</span>
+                <span class="n">topic_gene_peak</span> <span class="o">=</span> <span class="p">(</span><span class="n">topic_peak_denoised1</span><span class="p">[</span><span class="n">topic</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">gene_peak</span><span class="p">)</span>
+                <span class="n">G_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_binding_matrix_activator</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">topic_gene_peak</span>
+                <span class="n">G_topic</span> <span class="o">=</span> <span class="n">G_topic</span> <span class="o">/</span> <span class="p">(</span><span class="n">gene_peak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+                <span class="n">grn_atac_activator</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">G_topic</span>
+
+                <span class="n">topic_gene_peak</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">topic_peak_denoised1</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-20</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">gene_peak</span>
+                <span class="n">G_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_binding_matrix_repressor</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">topic_gene_peak</span>
+                <span class="n">G_topic</span> <span class="o">=</span> <span class="n">G_topic</span> <span class="o">/</span> <span class="p">(</span><span class="n">gene_peak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+                <span class="n">grn_atac_repressor</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">G_topic</span>
+
+            <span class="n">C</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_genes</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">tf_expression_input</span> <span class="o">=</span> <span class="n">topic_tf_input</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_topics</span><span class="p">):</span>
+                <span class="n">gene_atac_activator_topic</span> <span class="o">=</span> <span class="n">grn_atac_activator</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">grn_atac_activator</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span>
+                <span class="n">gene_atac_repressor_topic</span> <span class="o">=</span> <span class="n">grn_atac_repressor</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">grn_atac_repressor</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span>
+
+                <span class="n">G_act</span> <span class="o">=</span> <span class="n">gene_atac_activator_topic</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tf_gene_topic_activator_grn</span><span class="p">[</span><span class="n">topic</span><span class="p">])</span>
+                <span class="n">G_rep</span> <span class="o">=</span> <span class="n">gene_atac_repressor_topic</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tf_gene_topic_repressor_grn</span><span class="p">[</span><span class="n">topic</span><span class="p">])</span>
+
+                <span class="n">C</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf_expression_input</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">@</span> <span class="n">G_act</span> <span class="o">+</span> <span class="n">tf_expression_input</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">@</span> <span class="n">G_rep</span>
+
+            <span class="n">batch_factor_rna_grn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">batch_onehot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rna_grn_batch_factor</span><span class="p">)</span>
+            <span class="n">preds_rna_from_grn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+            <span class="n">preds_rna_from_grn</span> <span class="o">=</span> <span class="n">preds_rna_from_grn</span> <span class="o">+</span> <span class="n">batch_factor_rna_grn</span>
+            <span class="n">preds_rna_from_grn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rna_grn_batch_norm</span><span class="p">(</span><span class="n">preds_rna_from_grn</span><span class="p">)</span>
+            <span class="n">preds_rna_from_grn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">preds_rna_from_grn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">preds_rna_from_grn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">preds_rna</span><span class="p">)</span>
+
+        <span class="n">mu_nb_rna_grn</span> <span class="o">=</span> <span class="n">preds_rna_from_grn</span> <span class="o">*</span> <span class="n">library_factor_rna</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span>
+            <span class="s2">&quot;mu_theta&quot;</span><span class="p">:</span> <span class="n">mu_theta</span><span class="p">,</span>
+            <span class="s2">&quot;preds_atac&quot;</span><span class="p">:</span> <span class="n">preds_atac</span><span class="p">,</span>
+            <span class="s2">&quot;preds_tf&quot;</span><span class="p">:</span> <span class="n">preds_tf</span><span class="p">,</span>
+            <span class="s2">&quot;mu_nb_tf&quot;</span><span class="p">:</span> <span class="n">mu_nb_tf</span><span class="p">,</span>
+            <span class="s2">&quot;preds_rna&quot;</span><span class="p">:</span> <span class="n">preds_rna</span><span class="p">,</span>
+            <span class="s2">&quot;mu_nb_rna&quot;</span><span class="p">:</span> <span class="n">mu_nb_rna</span><span class="p">,</span>
+            <span class="s2">&quot;preds_rna_from_grn&quot;</span><span class="p">:</span> <span class="n">preds_rna_from_grn</span><span class="p">,</span>
+            <span class="s2">&quot;mu_nb_rna_grn&quot;</span><span class="p">:</span> <span class="n">mu_nb_rna_grn</span><span class="p">,</span>
+            <span class="s2">&quot;library_factor_tf&quot;</span><span class="p">:</span> <span class="n">library_factor_tf</span><span class="p">,</span>
+            <span class="s2">&quot;library_factor_rna&quot;</span><span class="p">:</span> <span class="n">library_factor_rna</span>
+        <span class="p">}</span></div>
+</div>
+
+
+<div class="viewcode-block" id="initialize_scdori_parameters">
+<a class="viewcode-back" href="../../scdori.html#scdori.models.initialize_scdori_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_scdori_parameters</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span>
+    <span class="n">gene_peak_distance_exp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">gene_peak_fixed</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">insilico_act</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">insilico_rep</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;warmup&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize or freeze certain scDoRI parameters, preparing for either warmup or GRN phases.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">        An instance of the scDoRI model.</span>
+<span class="sd">    gene_peak_distance_exp : torch.Tensor</span>
+<span class="sd">        Shape (num_genes, num_peaks). Peak-gene distance matrix, usually an exponential decay.</span>
+<span class="sd">    gene_peak_fixed : torch.Tensor</span>
+<span class="sd">        Shape (num_genes, num_peaks). A binary mask indicating allowable gene-peak links.</span>
+<span class="sd">    insilico_act : torch.Tensor</span>
+<span class="sd">        Shape (num_peaks, num_tfs). In silico ChIP-seq matrix for activators.</span>
+<span class="sd">    insilico_rep : torch.Tensor</span>
+<span class="sd">        Shape (num_peaks, num_tfs). In silico ChIP-seq matrix for repressors.</span>
+<span class="sd">    phase : str, optional</span>
+<span class="sd">        &quot;warmup&quot; or &quot;grn&quot;. In &quot;warmup&quot;, sets gene-peak and TF-binding matrices,</span>
+<span class="sd">        and keeps them fixed or partially trainable. In &quot;grn&quot;, enables TF-gene</span>
+<span class="sd">        parameters to be trainable.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Modifies `model` in place, setting appropriate `.data` values and</span>
+<span class="sd">        `.requires_grad` booleans.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="o">!=</span> <span class="s2">&quot;grn&quot;</span><span class="p">:</span>
+            <span class="c1"># 1) Set the fixed gene-peak mask.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">gene_peak_fixed</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># 2) Initialize the learnable gene-peak factor with distance-based weights.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">gene_peak_distance_exp</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_learnt</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># 3) Initialize TF binding matrices for activator &amp; repressor.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_activator</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">insilico_act</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_activator</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_repressor</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">insilico_rep</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_binding_matrix_repressor</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_activator_grn</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_repressor_grn</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;grn&quot;</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">gene_peak_factor_fixed</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># Enable fine-tuning of TF-gene links per topic</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_activator_grn</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">tf_gene_topic_repressor_grn</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;scDoRI parameters (peak-gene distance &amp; TF binding) initialized and relevant parameters frozen.&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scDoRI</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocessing_pipeline.html">Preprocessing Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scdori.html">scDORI training</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Manu Saraswat.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
