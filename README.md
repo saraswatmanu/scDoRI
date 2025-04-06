@@ -25,7 +25,10 @@ conda env create -f environment.yml
 conda activate scdori-env
 ```
 ### 3) Edit config files
-Edit config files: - preprocessing_pipeline/config.py to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on. - scdori/config.py for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
+#### First edit preprocessing_pipeline/config.py 
+to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on. - scdori/config.py for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
+#### Second edit scdori/config.py
+for scDoRI hyperparameters (number of topics, learning rate, epochs etc.)
 
 ### 4) Run Notebooks
-in order: - notebooks/preprocessing.ipynb - notebooks/training.ipynb
+first run notebooks/preprocessing.ipynb, then notebooks/training.ipynb
