@@ -51,10 +51,14 @@ notebooks/training.ipynb
 👉 https://saraswatmanu.github.io/scDoRI/
 
 Includes:
-API reference (docstrings)
-(upcoming) In-depth method overview
-(upcoming) Preprocessing + training guides
-(upcoming) Customization tips
+
+✅ API reference (docstrings)
+
+🛠️ (upcoming) In-depth method overview
+
+🧪 (upcoming) Preprocessing + training guides
+
+⚙️ (upcoming) Customization tips
 
 ## 📣 Citation
 If you use scDoRI in your work, please cite our preprint/paper (coming soon).
