@@ -22,7 +22,7 @@ These datasets must be paired — i.e., RNA and ATAC should come from the **same
   
 ## 📦 Installation 
 
-Clone the repo and create the conda environment:
+To install all dependencies for scDoRI, we recommend using [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) or [Micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html).
 
 ```bash
 git clone https://github.com/saraswatmanu/scDoRI.git
