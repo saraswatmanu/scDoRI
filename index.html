@@ -47,7 +47,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API Reference" href="api_reference.html" />
+    <link rel="next" title="Model Overview &amp; Architecture" href="method_overview.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -126,6 +126,20 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="method_overview.html">
+    Model Overview & Architecture
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="training_guide.html">
+    Hyperparameter Configuration Guide
+  </a>
+</li>
+
+
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="api_reference.html">
     API Reference
@@ -216,6 +230,20 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="method_overview.html">
+    Model Overview & Architecture
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="training_guide.html">
+    Hyperparameter Configuration Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="api_reference.html">
     API Reference
   </a>
@@ -283,7 +311,7 @@
 <span id="index"></span><h1>Welcome to scDoRI: Single-cell Deep Multi-Omic Regulatory Inference<a class="headerlink" href="#welcome-to-scdori-single-cell-deep-multi-omic-regulatory-inference" title="Link to this heading">#</a></h1>
 <a class="reference internal image-reference" href="_images/scdori_schematic_main.png"><img alt="scDoRI Schematic" class="align-center" src="_images/scdori_schematic_main.png" style="width: 80%;" />
 </a>
-<p><strong>scDoRI</strong> jointly models single-cell RNA-seq and ATAC-seq to infer
+<p><strong>scDoRI</strong> jointly models single-cell RNA-seq and ATAC-seq multi-ome data to infer
 <strong>enhancer-mediated gene regulatory networks (eGRNs)</strong>. It couples an
 <strong>Encoder-Decoder</strong> neural architecture with mechanistic constraints
 (enhancer-gene links, TF activators/repressors), yielding
@@ -295,9 +323,28 @@ continuous, cell-specific changes in gene regulation.</p>
 <ul class="simple">
 <li><p><strong>Unified</strong> approach: single model for dimensionality reduction + eGRN inference</p></li>
 <li><p><strong>Biological insights</strong>:  identifies lower dimensional topics, candidate enhancer-gene links, co-regulated gene programs, TF-gene networks per topic</p></li>
-<li><p><strong>Continuous eGRN Modelling without predefined clusters</strong>: each cell is a mixture of regulatory topics, allowing assemement of fine-grained changes in regulatory programs</p></li>
+<li><p><strong>Continuous eGRN Modelling without predefined clusters</strong>: each cell is a mixture of regulatory topics, allowing assessment of fine-grained changes in regulatory programs</p></li>
 <li><p><strong>Scalable</strong>: mini-batch training for large single-cell multiome datasets</p></li>
 </ul>
+</section>
+<section id="input-requirements">
+<h2>Input Requirements<a class="headerlink" href="#input-requirements" title="Link to this heading">#</a></h2>
+<p>scDoRI expects <strong>single-cell multiome data</strong> with the following inputs:</p>
+<ul class="simple">
+<li><p><strong>RNA</strong>: an AnnData <cite>.h5ad</cite> object with a <strong>cells by genes</strong> raw expression counts matrix</p></li>
+<li><p><strong>ATAC</strong>: an AnnData <cite>.h5ad</cite> object with a <strong>cells by peaks</strong> raw Tn5 insertion counts matrix
+- Peaks must include genomic coordinates in <cite>.var</cite> with columns: <cite>chr</cite>, <cite>start</cite>, and <cite>end</cite></p></li>
+</ul>
+<p>These datasets must be paired i.e., RNA and ATAC should come from the <strong>same cells</strong>.</p>
+<p>The example notebooks provided in this repository are built using the <strong>mouse gastrulation dataset</strong> from:</p>
+<ul class="simple">
+<li><p>Argelaguet et al., BioRxiv 2022: <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2022.06.15.496239v1">https://www.biorxiv.org/content/10.1101/2022.06.15.496239v1</a></p></li>
+<li><p>Dataset download link: <a class="reference external" href="https://www.dropbox.com/scl/fo/9inmw43pz2bygtqepxl82/ALeeNjuEqw4qp0L9Z9t71xo/data/processed?rlkey=5ihgkvafegkke9jnldlnhw1x6&amp;subfolder_nav_tracking=1&amp;st=cixvwynt&amp;dl=0">https://www.dropbox.com/scl/fo/9inmw43pz2bygtqepxl82/ALeeNjuEqw4qp0L9Z9t71xo/data/processed?rlkey=5ihgkvafegkke9jnldlnhw1x6&amp;subfolder_nav_tracking=1&amp;st=cixvwynt&amp;dl=0</a></p></li>
+</ul>
+</section>
+<section id="model-architecture-and-training">
+<h2>Model Architecture and training<a class="headerlink" href="#model-architecture-and-training" title="Link to this heading">#</a></h2>
+<p>See the <a class="reference internal" href="method_overview.html"><span class="doc">Model Overview &amp; Architecture</span></a> for descriptions on core features of the model including encoder–decoder design, reconstruction tasks and training scheme.</p>
 </section>
 <section id="project-layout">
 <h2>Project Layout<a class="headerlink" href="#project-layout" title="Link to this heading">#</a></h2>
@@ -371,6 +418,10 @@ Training (Notebook 2)</div>
 </div>
 </div>
 </section>
+<section id="hyperparameter-and-feature-selection-guide">
+<h2>Hyperparameter and feature selection guide<a class="headerlink" href="#hyperparameter-and-feature-selection-guide" title="Link to this heading">#</a></h2>
+<p>See the <a class="reference internal" href="training_guide.html"><span class="doc">Hyperparameter Configuration Guide</span></a> page for documentation for guidance on choosing number of features(peaks, genes, TFs) and hyperparameters(number of topics, regularisation etc)</p>
+</section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <p>See the <a class="reference internal" href="api_reference.html"><span class="doc">API Reference</span></a> page for documentation on:</p>
@@ -400,11 +451,11 @@ upcoming publication. For questions, open a GitHub Issue or email the maintainer
                   
 <div class="prev-next-area">
     <a class="right-next"
-       href="api_reference.html"
+       href="method_overview.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">API Reference</p>
+        <p class="prev-next-title">Model Overview &amp; Architecture</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -428,9 +479,12 @@ upcoming publication. For questions, open a GitHub Issue or email the maintainer
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-highlights">Key Highlights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-requirements">Input Requirements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-architecture-and-training">Model Architecture and training</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-layout">Project Layout</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-and-usage">Installation and Usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorial-notebooks">Tutorial Notebooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hyperparameter-and-feature-selection-guide">Hyperparameter and feature selection guide</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#license-citation">License &amp; Citation</a></li>
 </ul>
