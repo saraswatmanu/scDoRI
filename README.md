@@ -28,7 +28,7 @@ Clone the repo and create the conda environment:
 git clone https://github.com/saraswatmanu/scDoRI.git
 cd scDoRI
 conda env create -f environment.yml
-conda activate scdori-env
+conda activate scdori_env
 ```
 > ⚡ **Note**: The training process is GPU-accelerated and **highly recommended** to be run on a GPU-enabled machine.  
 > While preprocessing can run on CPU, training large datasets on CPU is not advised due to slow performance.
