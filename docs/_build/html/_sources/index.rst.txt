@@ -9,7 +9,7 @@ Welcome to scDoRI: Single-cell Deep Multi-Omic Regulatory Inference
    :width: 80%
    :alt: scDoRI Schematic
 
-**scDoRI** jointly models single-cell RNA-seq and ATAC-seq to infer
+**scDoRI** jointly models single-cell RNA-seq and ATAC-seq multi-ome data to infer
 **enhancer-mediated gene regulatory networks (eGRNs)**. It couples an
 **Encoder-Decoder** neural architecture with mechanistic constraints
 (enhancer-gene links, TF activators/repressors), yielding
@@ -22,8 +22,33 @@ Key Highlights
 
 - **Unified** approach: single model for dimensionality reduction + eGRN inference
 - **Biological insights**:  identifies lower dimensional topics, candidate enhancer-gene links, co-regulated gene programs, TF-gene networks per topic
-- **Continuous eGRN Modelling without predefined clusters**: each cell is a mixture of regulatory topics, allowing assemement of fine-grained changes in regulatory programs
+- **Continuous eGRN Modelling without predefined clusters**: each cell is a mixture of regulatory topics, allowing assessment of fine-grained changes in regulatory programs
 - **Scalable**: mini-batch training for large single-cell multiome datasets
+
+
+Input Requirements
+------------------
+
+scDoRI expects **single-cell multiome data** with the following inputs:
+
+- **RNA**: an AnnData `.h5ad` object with a **cells by genes** raw expression counts matrix  
+- **ATAC**: an AnnData `.h5ad` object with a **cells by peaks** raw Tn5 insertion counts matrix  
+  - Peaks must include genomic coordinates in `.var` with columns: `chr`, `start`, and `end`
+
+These datasets must be paired i.e., RNA and ATAC should come from the **same cells**.
+
+The example notebooks provided in this repository are built using the **mouse gastrulation dataset** from:
+
+- Argelaguet et al., BioRxiv 2022: https://www.biorxiv.org/content/10.1101/2022.06.15.496239v1  
+- Dataset download link: https://www.dropbox.com/scl/fo/9inmw43pz2bygtqepxl82/ALeeNjuEqw4qp0L9Z9t71xo/data/processed?rlkey=5ihgkvafegkke9jnldlnhw1x6&subfolder_nav_tracking=1&st=cixvwynt&dl=0
+
+
+
+
+Model Architecture and training
+-------------
+
+See the :doc:`method_overview` for descriptions on core features of the model including encoder--decoder design, reconstruction tasks and training scheme.
 
 
 Project Layout
@@ -67,12 +92,10 @@ Installation and Usage
    - `notebooks/preprocessing.ipynb`
    - `notebooks/training.ipynb`
 
-
 .. caution::
    If using a mouse dataset, set ``species = "mouse"`` in config. 
    For human, change accordingly and update your motif file path (cisbp or custom).
    Ensure consistent schema in motif meme file compared to the example cisbp file provided.
-
 
 Tutorial Notebooks
 ------------------
@@ -98,6 +121,11 @@ Tutorial Notebooks
 
 
 
+Hyperparameter and feature selection guide
+-------------
+
+See the :doc:`training_guide` page for documentation for guidance on choosing number of features(peaks, genes, TFs) and hyperparameters(number of topics, regularisation etc)
+
 API Reference
 -------------
 
@@ -118,4 +146,7 @@ upcoming publication. For questions, open a GitHub Issue or email the maintainer
    :maxdepth: 2
    :hidden:
 
+   method_overview
+   training_guide
    api_reference
+
