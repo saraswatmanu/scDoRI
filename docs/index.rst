@@ -54,10 +54,10 @@ Installation and Usage
 
    .. code-block:: bash
 
-      git clone https://github.com/YourUser/scDoRI.git
+      git clone https://github.com/saraswatmanu/scDoRI.git
       cd scDoRI
       conda env create -f environment.yml
-      conda activate scdori-env
+      conda activate scdori_env
 
 2. **Edit** config files:
    - `preprocessing_pipeline/config.py` to specify location of RNA and ATAC anndata .h5ad files, motif file, and set number of peaks/genes/TFs to train on.
