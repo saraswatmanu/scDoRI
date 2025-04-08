@@ -132,13 +132,7 @@ def get_tf_expression(tf_expression_mode, model, device, train_loader,
 
         median_cell = np.median(rna_tf_vals.sum(axis=1))
         rna_tf_vals = median_cell * (rna_tf_vals / rna_tf_vals.sum(axis=1, keepdims=True))
-        topic_tf = []
-        for t in range(model.num_topics):
-            topic_vals = rna_tf_vals[top_k_indices[:, t], :]
-            topic_vals = topic_vals.mean(axis=0)
-            topic_tf.append(topic_vals)
-
-        topic_tf = np.array(topic_tf)
+        topic_tf = np.array([rna_tf_vals[top_k_indices[:, t], :].mean(axis=0) for t in range(model.num_topics)])
         topic_tf = torch.from_numpy(topic_tf)
 
         preds_tf_denoised_min, _ = torch.min(topic_tf, dim=1, keepdim=True)
